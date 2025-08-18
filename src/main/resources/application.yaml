@@ -1,0 +1,75 @@
+spring:
+  application:
+    name: qr-menu-web
+
+  threads:
+    virtual:
+      enabled: true
+
+  #  task:
+  #    execution:
+  #      virtual:
+  #        enabled: true
+  #    scheduling:
+  #      virtual:
+  #        enabled: true
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/qr-menu-db
+    username: myuser
+    password: secret
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: none
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+      lettuce:
+        pool:
+          max-active: 50
+          max-idle: 20
+          min-idle: 5
+
+  session:
+    redis:
+      flush-mode: on-save
+      namespace: spring:session
+    timeout: 1800
+
+  cache:
+    type: redis
+
+  servlet:
+    multipart:
+      max-file-size: 5MB
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+
+  security:
+    secret:
+      key: ${JWT_SECRET_KEY}
+    token:
+      access:
+        expiration: 900000
+      refresh:
+        expiration: 604800000
+
+server:
+  port: 8080
+
+s3:
+  bucket-name: "qr-menu-themes-bucket"
+  placeholder-thumbnail: "s3://${s3.bucket-name}/placeholder.jpg"
+
+app:
+  base-url: http://localhost:8080
+  cookie:
+    secure: false

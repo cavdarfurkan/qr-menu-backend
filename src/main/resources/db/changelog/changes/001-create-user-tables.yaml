@@ -1,0 +1,132 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: Furkan Cavdar
+      preConditions:
+        - onFail: MARK_RAN
+          and:
+            - not:
+                tableExists:
+                  tableName: roles
+            - not:
+                tableExists:
+                  tableName: users
+            - not:
+                tableExists:
+                  tableName: user_roles
+      changes:
+        - createTable:
+            tableName: roles
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: username
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: enabled
+                  type: boolean
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: account_non_expired
+                  type: boolean
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: account_non_locked
+                  type: boolean
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: credentials_non_expired
+                  type: boolean
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+
+        - createTable:
+            tableName: user_roles
+            columns:
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+
+        - addPrimaryKey:
+            tableName: user_roles
+            columnNames: user_id, role_id
+            constraintName: pk_user_roles
+
+        - addForeignKeyConstraint:
+            baseTableName: user_roles
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_user_roles_user
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: user_roles
+            baseColumnNames: role_id
+            referencedTableName: roles
+            referencedColumnNames: id
+            constraintName: fk_user_roles_role
+            onDelete: CASCADE
+
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: name
+                  value: "ADMIN"
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: name
+                  value: "USER"

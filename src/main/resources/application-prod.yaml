@@ -1,0 +1,38 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/qr-menu-db
+    username: myuser
+    password: secret
+    driver-class-name: org.postgresql.Driver
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+      lettuce:
+        pool:
+          max-active: 50
+          max-idle: 20
+          min-idle: 5
+
+  security:
+    token:
+      access:
+        expiration: 900000
+      refresh:
+        expiration: 604800000
+
+server:
+  port: 8080
+  ssl:
+    enabled: true
+
+s3:
+  bucket-name: "qr-menu-themes-bucket"
+  placeholder-thumbnail: "s3://${s3.bucket-name}/placeholder.jpg"
+
+app:
+  base-url: http://localhost:8080
+  cookie:
+    secure: true

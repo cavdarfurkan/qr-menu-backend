@@ -1,0 +1,56 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1749054135966-1
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_menu
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: menu_name
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: owner_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: selected_theme_id
+                  type: BIGINT
+            tableName: menu
+        - addForeignKeyConstraint:
+            baseColumnNames: owner_id
+            baseTableName: menu
+            constraintName: FK_MENU_ON_OWNER
+            referencedColumnNames: id
+            referencedTableName: users
+        - addForeignKeyConstraint:
+            baseColumnNames: selected_theme_id
+            baseTableName: menu
+            constraintName: FK_MENU_ON_SELECTED_THEME
+            referencedColumnNames: id
+            referencedTableName: theme
+  - changeSet:
+      id: 1749054135966-2
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - dropSequence:
+            sequenceName: theme_seq
+        - addAutoIncrement:
+            columnDataType: bigint
+            columnName: id
+            tableName: theme
+

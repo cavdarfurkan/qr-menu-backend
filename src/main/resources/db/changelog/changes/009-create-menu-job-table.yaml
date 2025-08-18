@@ -1,0 +1,22 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1750544238117-1
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_menu_job
+                  name: id
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: menu_job_status
+                  type: SMALLINT
+            tableName: menu_job
+

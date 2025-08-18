@@ -1,0 +1,59 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1750105561199-1
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: schemas
+                  type: jsonb
+              - column:
+                  name: theme_manifest_author
+                  type: VARCHAR(255)
+              - column:
+                  name: theme_manifest_created_at
+                  type: VARCHAR(255)
+              - column:
+                  name: theme_manifest_description
+                  type: VARCHAR(255)
+              - column:
+                  name: theme_manifest_name
+                  type: VARCHAR(255)
+              - column:
+                  name: theme_manifest_schemas_location
+                  type: jsonb
+              - column:
+                  name: theme_manifest_version
+                  type: VARCHAR(255)
+            tableName: theme
+  - changeSet:
+      id: 1750105561199-6
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addNotNullConstraint:
+            columnName: theme_manifest_name
+            tableName: theme
+  - changeSet:
+      id: 1750105561199-9
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addUniqueConstraint:
+            columnNames: theme_manifest_name
+            constraintName: uc_theme_theme_manifest_name
+            tableName: theme
+  - changeSet:
+      id: 1750105561199-11
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - dropColumn:
+            columnName: description
+            tableName: theme
+        - dropColumn:
+            columnName: theme_name
+            tableName: theme
+

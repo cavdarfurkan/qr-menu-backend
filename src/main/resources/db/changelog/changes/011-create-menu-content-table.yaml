@@ -1,0 +1,84 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1750845147724-1
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_menu_content
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: menu_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: owner_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: theme_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: collection_name
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: content_json
+                  type: jsonb
+              - column:
+                  constraints:
+                    nullable: false
+                  name: created_at
+                  type: TIMESTAMPTZ
+              - column:
+                  constraints:
+                    nullable: false
+                  name: updated_at
+                  type: TIMESTAMPTZ
+            tableName: menu_content
+  - changeSet:
+      id: 1750845147724-2
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addUniqueConstraint:
+            columnNames: menu_id, collection_name
+            constraintName: uc_b65b397cf0945422376bba2f9
+            tableName: menu_content
+  - changeSet:
+      id: 1750845147724-3
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: menu_id
+            baseTableName: menu_content
+            constraintName: FK_MENU_CONTENT_ON_MENU
+            referencedColumnNames: id
+            referencedTableName: menu
+  - changeSet:
+      id: 1750845147724-4
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: theme_id
+            baseTableName: menu_content
+            constraintName: FK_MENU_CONTENT_ON_THEME
+            referencedColumnNames: id
+            referencedTableName: theme
+

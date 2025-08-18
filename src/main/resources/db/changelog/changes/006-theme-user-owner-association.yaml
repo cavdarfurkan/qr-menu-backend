@@ -1,0 +1,32 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1748537801092-1
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: owner_id
+                  type: BIGINT
+            tableName: theme
+  - changeSet:
+      id: 1748537801092-2
+      author: fcavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addNotNullConstraint:
+            columnName: owner_id
+            tableName: theme
+  - changeSet:
+      id: 1748537801092-3
+      author: fcavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: owner_id
+            baseTableName: theme
+            constraintName: FK_THEME_ON_OWNER
+            referencedColumnNames: id
+            referencedTableName: users
+

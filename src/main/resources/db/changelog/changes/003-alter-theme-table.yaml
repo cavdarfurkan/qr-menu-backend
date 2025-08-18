@@ -1,0 +1,24 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1747577100665-1
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: theme_location_url
+                  type: VARCHAR(255)
+            tableName: theme
+        - addNotNullConstraint:
+            columnName: theme_location_url
+            tableName: theme
+        - addUniqueConstraint:
+            columnNames: theme_location_url
+            constraintName: uc_theme_theme_location_url
+            tableName: theme
+        - addUniqueConstraint:
+            columnNames: preview_image_url
+            constraintName: uc_theme_preview_image_url
+            tableName: theme
+

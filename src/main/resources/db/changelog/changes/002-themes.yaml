@@ -1,0 +1,52 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1747053898273-1
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createSequence:
+            incrementBy: 50
+            sequenceName: theme_seq
+            startValue: 1
+        - createTable:
+            tableName: theme
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_theme
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: theme_name
+                  type: VARCHAR(255)
+              - column:
+                  name: description
+                  type: VARCHAR(255)
+              - column:
+                  name: preview_image_url
+                  type: VARCHAR(255)
+              - column:
+                  name: is_free
+                  type: BOOLEAN
+  - changeSet:
+      id: 1747053898273-2
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - modifyDataType:
+            tableName: users
+            columnName: email
+            newDataType: VARCHAR(255)
+        - modifyDataType:
+            tableName: roles
+            columnName: name
+            newDataType: VARCHAR(255)
+        - modifyDataType:
+            tableName: users
+            columnName: username
+            newDataType: VARCHAR(255)
+
