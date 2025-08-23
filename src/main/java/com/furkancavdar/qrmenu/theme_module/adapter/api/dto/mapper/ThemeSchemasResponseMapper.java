@@ -10,6 +10,10 @@ public class ThemeSchemasResponseMapper {
     }
 
     public static ThemeSchemasResponseDto fromThemeSchemasResultDto(ThemeSchemasResultDto themeSchemasResultDto) {
-        return new ThemeSchemasResponseDto(themeSchemasResultDto.getSchemasCount(), themeSchemasResultDto.getThemeSchemas());
+        return new ThemeSchemasResponseDto(
+                themeSchemasResultDto.getSchemasCount(),
+                themeSchemasResultDto.getThemeSchemas(),
+                themeSchemasResultDto.getUiSchemas()
+        );
     }
 }

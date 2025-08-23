@@ -1,5 +1,6 @@
 package com.furkancavdar.qrmenu.theme_module.adapter.api.dto.payload.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
@@ -16,5 +17,7 @@ import java.util.Map;
 public class ThemeSchemasResponseDto {
     private Integer schemasCount;
     private Map<String, JsonNode> themeSchemas;
-//    private List<JsonNode> themeSchemas;
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private Map<String, JsonNode> uiSchemas;
 }

@@ -2,7 +2,6 @@ package com.furkancavdar.qrmenu.theme_module.domain;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.furkancavdar.qrmenu.auth.domain.User;
-import com.furkancavdar.qrmenu.theme_module.domain.ThemeManifest;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -17,19 +16,23 @@ public class Theme {
     private final String themeLocationUrl;
     private final boolean isFree;
     private final ThemeManifest themeManifest;
-    private final Map<String, JsonNode> schemas;
+    private final Map<String, JsonNode> themeSchemas;
+    private final Map<String, JsonNode> uiSchemas;
 
-    public Theme(User owner, String thumbnailUrl, String themeLocationUrl, boolean isFree, ThemeManifest themeManifest, Map<String, JsonNode> schemas) {
+    public Theme(User owner, String thumbnailUrl, String themeLocationUrl, boolean isFree, ThemeManifest themeManifest,
+                 Map<String, JsonNode> themeSchemas, Map<String, JsonNode> uiSchemas) {
         this.owner = owner;
         this.thumbnailUrl = thumbnailUrl;
         this.themeLocationUrl = themeLocationUrl;
         this.isFree = isFree;
         this.themeManifest = themeManifest;
-        this.schemas = schemas;
+        this.themeSchemas = themeSchemas;
+        this.uiSchemas = uiSchemas;
     }
 
-    public Theme(Long id, User owner, String thumbnailUrl, String themeLocationUrl, boolean isFree, ThemeManifest themeManifest, Map<String, JsonNode> schemas) {
-        this(owner, thumbnailUrl, themeLocationUrl, isFree, themeManifest, schemas);
+    public Theme(Long id, User owner, String thumbnailUrl, String themeLocationUrl, boolean isFree,
+                 ThemeManifest themeManifest, Map<String, JsonNode> themeSchemas, Map<String, JsonNode> uiSchemas) {
+        this(owner, thumbnailUrl, themeLocationUrl, isFree, themeManifest, themeSchemas, uiSchemas);
         this.id = id;
     }
 

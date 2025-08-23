@@ -28,7 +28,7 @@ public interface ThemeRegisterUseCase {
 
     ThemeManifestResultDto getManifest(Long themeId);
 
-    ThemeSchemasResultDto getSchemas(Long themeId, List<String> refs);
+    ThemeSchemasResultDto getSchemas(Long themeId, List<String> refs, boolean includeUiSchemaFlag);
 
     Page<ThemeDto> getAllThemes(Integer page, Integer size);
 }

@@ -45,11 +45,16 @@ public class ThemeEntity {
             @AttributeOverride(name = "description", column = @Column(name = "theme_manifest_description")),
             @AttributeOverride(name = "author", column = @Column(name = "theme_manifest_author")),
             @AttributeOverride(name = "createdAt", column = @Column(name = "theme_manifest_created_at")),
-            @AttributeOverride(name = "schemasLocation", column = @Column(name = "theme_manifest_schemas_location", columnDefinition = "jsonb"))
+            @AttributeOverride(name = "contentTypes", column = @Column(name = "theme_manifest_content_types", columnDefinition = "jsonb"))
     })
     private ThemeManifest themeManifest;
 
-    @Column(name = "schemas", columnDefinition = "jsonb")
+    @Column(name = "theme_schemas", columnDefinition = "jsonb", nullable = false)
     @JdbcTypeCode(SqlTypes.JSON)
-    private Map<String, JsonNode> schemas;
+    private Map<String, JsonNode> themeSchemas;
+
+    @Column(name = "ui_schemas", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, JsonNode> uiSchemas;
+
 }

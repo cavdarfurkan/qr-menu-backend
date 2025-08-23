@@ -18,4 +18,5 @@ public class ThemeDto {
     private Boolean isFree = Boolean.TRUE;
     private ThemeManifest themeManifest;
     private Map<String, JsonNode> themeSchemas;
+    private Map<String, JsonNode> uiSchemas;
 }

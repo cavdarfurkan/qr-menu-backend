@@ -64,9 +64,13 @@ public class ThemeControllerV1 {
     }
 
     @GetMapping("/{themeId}/schemas")
-    public ResponseEntity<ApiResponse<ThemeSchemasResponseDto>> getThemeSchemas(@PathVariable String themeId, @RequestParam(required = false) List<String> refs) {
+    public ResponseEntity<ApiResponse<ThemeSchemasResponseDto>> getThemeSchemas(
+            @PathVariable String themeId,
+            @RequestParam(required = false) List<String> refs,
+            @RequestParam(value = "uiSchema", required = false, defaultValue = "false") boolean includeUiSchemaFlag
+    ) {
         try {
-            ThemeSchemasResultDto schemasResult = themeRegisterUseCase.getSchemas(Long.valueOf(themeId), refs);
+            ThemeSchemasResultDto schemasResult = themeRegisterUseCase.getSchemas(Long.valueOf(themeId), refs, includeUiSchemaFlag);
             ThemeSchemasResponseDto response = ThemeSchemasResponseMapper.fromThemeSchemasResultDto(schemasResult);
             return ResponseEntity.ok(ApiResponse.success(response));
         } catch (ResourceNotFoundException e) {
@@ -120,7 +124,8 @@ public class ThemeControllerV1 {
             themeRegisterUseCase.registerTheme(
                     zipFile.getInputStream(),
                     imageFile != null ? imageFile.getInputStream() : null,
-                    RegisterThemeRequestMapper.toThemeDto(null, registerThemeRequestDto, optionalUser.get(), null, null)
+                    RegisterThemeRequestMapper.toThemeDto(null, registerThemeRequestDto, optionalUser.get(),
+                            null, null, null)
             );
         } catch (Exception e) {
             log.error("ThemeControllerV1:registerTheme error {}", e.getMessage());

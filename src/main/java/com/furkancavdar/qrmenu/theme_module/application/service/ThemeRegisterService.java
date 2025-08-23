@@ -15,19 +15,15 @@ import com.furkancavdar.qrmenu.theme_module.domain.ThemeManifest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -53,8 +49,9 @@ public class ThemeRegisterService implements ThemeRegisterUseCase {
             zipBytes = IOUtils.toByteArray(themeZipIs);
             ExtractResult extractResult = extractManifestAndSchemas(zipBytes);
             themeDto.setThemeManifest(extractResult.manifest);
-            themeDto.setThemeSchemas(extractResult.schemas);
-        } catch (IOException e) {
+            themeDto.setThemeSchemas(extractResult.themeSchemas);
+            themeDto.setUiSchemas(extractResult.uiSchemas);
+        } catch (Exception e) {
             log.error("ThemeRegisterService.registerTheme error: {}", e.getMessage());
             throw new RuntimeException(e.getMessage());
         }
@@ -98,25 +95,40 @@ public class ThemeRegisterService implements ThemeRegisterUseCase {
     }
 
     @Override
-    public ThemeSchemasResultDto getSchemas(Long themeId, List<String> refs) {
+    public ThemeSchemasResultDto getSchemas(Long themeId, List<String> refs, boolean includeUiSchemaFlag) {
         Theme theme = themeRepository.findById(themeId).orElseThrow(() -> new ResourceNotFoundException("Theme not found"));
 
-        Map<String, JsonNode> schemas = theme.getSchemas();
-        if (schemas == null) {
-            return new ThemeSchemasResultDto(0, null);
+        Map<String, JsonNode> themeSchemas = theme.getThemeSchemas();
+        if (themeSchemas == null) {
+            return new ThemeSchemasResultDto(0, null, null);
+        }
+
+        Map<String, JsonNode> uiSchemas = Collections.emptyMap();
+        if (includeUiSchemaFlag) {
+            uiSchemas = theme.getUiSchemas();
         }
 
         if (refs == null || refs.isEmpty()) {
-            return new ThemeSchemasResultDto(schemas.size(), schemas);
+            return new ThemeSchemasResultDto(themeSchemas.size(), themeSchemas, uiSchemas);
         }
 
         Map<String, JsonNode> filteredSchemas = new HashMap<>();
-        schemas.forEach((k, v) -> {
+        themeSchemas.forEach((k, v) -> {
             if (refs.contains(k)) {
                 filteredSchemas.put(k, v);
             }
         });
-        return new ThemeSchemasResultDto(filteredSchemas.size(), filteredSchemas);
+
+        Map<String, JsonNode> filteredUiSchemas = new HashMap<>();
+        if (uiSchemas != null) {
+            uiSchemas.forEach((k, v) -> {
+                if (refs.contains(k)) {
+                    filteredUiSchemas.put(k, v);
+                }
+            });
+        }
+
+        return new ThemeSchemasResultDto(filteredSchemas.size(), filteredSchemas, filteredUiSchemas);
     }
 
     @Override
@@ -125,51 +137,84 @@ public class ThemeRegisterService implements ThemeRegisterUseCase {
     }
 
     private ExtractResult extractManifestAndSchemas(byte[] zipBytes) {
-        if (!containsManifest(new ByteArrayInputStream(zipBytes))) {
-            throw new RuntimeException("Zip file does not contain manifest");
+        final String manifestFilename = "manifest.json";
+        final String themeSchemasDir = "schemas/";
+        final String uiSchemasDir = "ui_schemas/";
+        final String loaderLocationsFilename = ".loader_locations.json";
+
+        if (!containsFiles(new ByteArrayInputStream(zipBytes), manifestFilename, themeSchemasDir, uiSchemasDir, loaderLocationsFilename)) {
+            throw new RuntimeException("Zip file does not contain required files: " + manifestFilename + " " + themeSchemasDir + " " + uiSchemasDir + " " + loaderLocationsFilename);
         }
 
-        ThemeManifest manifest = extractThemeManifest(new ByteArrayInputStream(zipBytes));
-        if (manifest == null) {
-            log.error("ThemeRegisterService:registerTheme themeManifest is null");
-            throw new RuntimeException("Theme manifest is null");
+        try {
+            ThemeManifest manifest = extractFile(new ByteArrayInputStream(zipBytes), manifestFilename, ThemeManifest.class);
+
+            Map<String, JsonNode> themeSchemas = manifest.getContentTypes().stream()
+                    .map(node -> Pair.of(
+                            node,
+                            extractFile(new ByteArrayInputStream(zipBytes), node.get("schemaPath").asText(), JsonNode.class)
+                    ))
+                    .collect(Collectors.toMap(
+                            pair -> pair.getLeft().get("name").asText(),
+                            Pair::getRight
+                    ));
+
+            Map<String, JsonNode> uiSchemas = manifest.getContentTypes().stream()
+                    .map(node -> Pair.of(
+                            node,
+                            extractFile(new ByteArrayInputStream(zipBytes), node.get("uiSchemaPath").asText(), JsonNode.class)
+                    ))
+                    .collect(Collectors.toMap(
+                            pair -> pair.getLeft().get("name").asText(),
+                            Pair::getRight
+                    ));
+
+            return new ExtractResult(manifest, themeSchemas, uiSchemas);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-
-        Map<String, JsonNode> schemas = manifest.getSchemasLocation().stream()
-                .map(node -> extractSchemas(new ByteArrayInputStream(zipBytes), node.get("path").asText()))
-                .collect(Collectors.toMap(node -> {
-                    if (node == null) {
-                        throw new RuntimeException("Schema location is null");
-                    }
-                    String[] refParts = node.get("$ref").asText().split("/");
-                    return refParts[refParts.length - 1];
-                }, Function.identity()));
-
-        return new ExtractResult(manifest, schemas);
     }
 
-    private Boolean containsManifest(InputStream is) {
+    private Boolean containsFiles(InputStream is, String firstFile, String... otherFiles) {
+        Set<String> filesToFind = new HashSet<>();
+        filesToFind.add(firstFile);
+        filesToFind.addAll(Arrays.asList(otherFiles));
+
+        Map<String, Boolean> filePresence = new HashMap<>();
+        for (String file : filesToFind) {
+            filePresence.put(file, false);
+        }
+
         try (ZipInputStream zis = new ZipInputStream(is)) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
-                if ("manifest.json".equals(entry.getName())) {
-                    return Boolean.TRUE;
+                String entryName = entry.getName();
+                if (!filePresence.containsKey(entryName)) {
+                    continue;
+                }
+
+                filePresence.put(entryName, true);
+
+                if (!filePresence.containsValue(false)) {
+                    break;
                 }
             }
         } catch (Exception e) {
-            log.error("ThemeControllerV1:containsThemeConfig error {}", e.getMessage());
+            log.error("ThemeControllerV1:containsFiles error {}", e.getMessage());
+            return Boolean.FALSE;
         }
-        return Boolean.FALSE;
+
+        return !filePresence.containsValue(false);
     }
 
-    private ThemeManifest extractThemeManifest(InputStream is) {
+    private <T> T extractFile(InputStream is, String filename, Class<T> valueType) {
         try (ZipInputStream zis = new ZipInputStream(is)) {
             byte[] buffer = new byte[1024]; // 1 KB
             int bytesRead;
 
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
-                if (!entry.getName().equals("manifest.json")) {
+                if (!entry.getName().equals(filename)) {
                     continue;
                 }
 
@@ -179,43 +224,18 @@ public class ThemeRegisterService implements ThemeRegisterUseCase {
                 }
                 byte[] fileData = output.toByteArray();
 
-                return objectMapper.readValue(fileData, ThemeManifest.class);
+                return objectMapper.readValue(fileData, valueType);
             }
         } catch (Exception e) {
-            log.error("ThemeRegisterService:getThemeManifest error", e);
+            log.error("ThemeRegisterService:extractFile error: {}", e.getMessage());
             throw new RuntimeException(e);
         }
 
-        return null;
+        log.error("ThemeRegisterService:registerTheme {} is null", filename);
+        throw new RuntimeException(filename + " is null");
     }
 
-    private JsonNode extractSchemas(InputStream is, String location) {
-        try (ZipInputStream zis = new ZipInputStream(is)) {
-            byte[] buffer = new byte[1024]; // 1 KB
-            int bytesRead;
-
-            ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null) {
-                if (!entry.getName().equals(location)) {
-                    continue;
-                }
-
-                ByteArrayOutputStream output = new ByteArrayOutputStream();
-                while ((bytesRead = zis.read(buffer)) != -1) {
-                    output.write(buffer, 0, bytesRead);
-                }
-                byte[] fileData = output.toByteArray();
-
-                return objectMapper.readValue(fileData, JsonNode.class);
-            }
-        } catch (Exception e) {
-            log.error("ThemeRegisterService:extractSchemas error", e);
-            throw new RuntimeException(e);
-        }
-
-        return null;
-    }
-
-    private record ExtractResult(ThemeManifest manifest, Map<String, JsonNode> schemas) {
+    private record ExtractResult(ThemeManifest manifest, Map<String, JsonNode> themeSchemas,
+                                 Map<String, JsonNode> uiSchemas) {
     }
 }

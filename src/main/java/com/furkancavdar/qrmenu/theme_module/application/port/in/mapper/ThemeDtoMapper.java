@@ -17,7 +17,8 @@ public class ThemeDtoMapper {
         themeDto.setOwner(theme.getOwner());
         themeDto.setIsFree(theme.isFree());
         themeDto.setThemeManifest(theme.getThemeManifest());
-        themeDto.setThemeSchemas(theme.getSchemas());
+        themeDto.setThemeSchemas(theme.getThemeSchemas());
+        themeDto.setUiSchemas(theme.getUiSchemas());
         return themeDto;
     }
 
@@ -29,7 +30,8 @@ public class ThemeDtoMapper {
                 themeLocationUrl,
                 themeDto.getIsFree(),
                 themeDto.getThemeManifest(),
-                themeDto.getThemeSchemas()
+                themeDto.getThemeSchemas(),
+                themeDto.getUiSchemas()
         );
     }
 }

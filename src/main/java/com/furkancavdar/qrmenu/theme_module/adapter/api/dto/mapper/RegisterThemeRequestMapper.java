@@ -13,13 +13,15 @@ public class RegisterThemeRequestMapper {
     private RegisterThemeRequestMapper() {
     }
 
-    public static ThemeDto toThemeDto(Long themeId, RegisterThemeRequestDto dto, User owner, ThemeManifest manifest, Map<String, JsonNode> schemas) {
+    public static ThemeDto toThemeDto(Long themeId, RegisterThemeRequestDto dto, User owner, ThemeManifest manifest,
+                                      Map<String, JsonNode> themeSchemas, Map<String, JsonNode> uiSchemas) {
         return new ThemeDto(
                 themeId,
                 owner,
                 dto.getIsFree(),
                 manifest,
-                schemas
+                themeSchemas,
+                uiSchemas
         );
     }
 }

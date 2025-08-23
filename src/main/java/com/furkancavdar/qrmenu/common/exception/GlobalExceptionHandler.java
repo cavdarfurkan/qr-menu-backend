@@ -2,7 +2,6 @@ package com.furkancavdar.qrmenu.common.exception;
 
 import com.furkancavdar.qrmenu.auth.application.exception.SessionOwnerException;
 import com.furkancavdar.qrmenu.common.ApiResponse;
-import com.furkancavdar.qrmenu.common.exception.ResourceNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.http.HttpStatus;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -77,6 +77,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiResponse<String> handleResourceNotFoundException(ResourceNotFoundException ex) {
+        return ApiResponse.error(ex.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponse<String> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
         return ApiResponse.error(ex.getMessage());
     }
 }

@@ -21,7 +21,8 @@ public class ThemeEntityMapper {
         themeEntity.setThemeLocationUrl(theme.getThemeLocationUrl());
         themeEntity.setIsFree(theme.isFree());
         themeEntity.setThemeManifest(theme.getThemeManifest());
-        themeEntity.setSchemas(theme.getSchemas());
+        themeEntity.setThemeSchemas(theme.getThemeSchemas());
+        themeEntity.setUiSchemas(theme.getUiSchemas());
 
         return themeEntity;
     }
@@ -38,7 +39,8 @@ public class ThemeEntityMapper {
                 themeEntity.getThemeLocationUrl(),
                 themeEntity.getIsFree(),
                 themeEntity.getThemeManifest(),
-                themeEntity.getSchemas()
+                themeEntity.getThemeSchemas(),
+                themeEntity.getUiSchemas()
         );
     }
 }

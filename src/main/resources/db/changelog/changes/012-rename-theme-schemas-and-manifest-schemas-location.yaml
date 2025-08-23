@@ -1,0 +1,25 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1755958357040-1
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - renameColumn:
+            tableName: theme
+            oldColumnName: schemas
+            newColumnName: theme_schemas
+            columnDataType: jsonb
+        - renameColumn:
+            tableName: theme
+            oldColumnName: theme_manifest_schemas_location
+            newColumnName: theme_manifest_content_types
+            columnDataType: jsonb
+  - changeSet:
+      id: 1755958357040-2
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addNotNullConstraint:
+            columnName: theme_schemas
+            tableName: theme
+

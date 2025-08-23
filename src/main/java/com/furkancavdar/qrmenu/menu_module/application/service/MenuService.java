@@ -81,7 +81,7 @@ public class MenuService implements MenuUseCase {
             throw new RuntimeException(ownerName + " is not the owner of menu " + menu.getMenuName());
         }
 
-        Map<String, List<JsonNode>> menuContents = menu.getSelectedTheme().getThemeManifest().getSchemasLocation().stream()
+        Map<String, List<JsonNode>> menuContents = menu.getSelectedTheme().getThemeManifest().getContentTypes().stream()
                 .map((node) -> node.get("name").asText())
                 .collect(Collectors.toMap(
                         collection -> collection,

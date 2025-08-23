@@ -18,5 +18,5 @@ public class ThemeManifest {
     private String createdAt;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    private List<JsonNode> schemasLocation;
+    private List<JsonNode> contentTypes;
 }

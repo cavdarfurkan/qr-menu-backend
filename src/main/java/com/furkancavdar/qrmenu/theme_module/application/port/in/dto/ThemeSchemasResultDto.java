@@ -13,4 +13,5 @@ import java.util.Map;
 public class ThemeSchemasResultDto {
     private Integer schemasCount;
     private Map<String, JsonNode> themeSchemas;
+    private Map<String, JsonNode> uiSchemas;
 }

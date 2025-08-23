@@ -48,10 +48,10 @@ public class MenuContentService implements MenuContentUseCase {
             throw new RuntimeException("Menu has no theme selected");
         }
 
-        if (!menu.getSelectedTheme().getSchemas().containsKey(collection)) {
+        if (!menu.getSelectedTheme().getThemeSchemas().containsKey(collection)) {
             throw new ResourceNotFoundException("Schema for collection %s not found".formatted(collection));
         }
-        JsonNode schema = menu.getSelectedTheme().getSchemas().get(collection);
+        JsonNode schema = menu.getSelectedTheme().getThemeSchemas().get(collection);
 
         content.forEach((data) -> {
             Set<ValidationMessage> errors = schemaFactory.getSchema(schema).validate(data);
