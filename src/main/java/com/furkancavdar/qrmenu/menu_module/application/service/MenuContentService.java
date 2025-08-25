@@ -1,5 +1,12 @@
 package com.furkancavdar.qrmenu.menu_module.application.service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.furkancavdar.qrmenu.auth.application.port.out.UserRepositoryPort;
 import com.furkancavdar.qrmenu.auth.domain.User;
@@ -12,13 +19,9 @@ import com.furkancavdar.qrmenu.menu_module.domain.MenuContent;
 import com.networknt.schema.JsonSchemaException;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.ValidationMessage;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @Service
@@ -34,8 +37,7 @@ public class MenuContentService implements MenuContentUseCase {
     @Override
     public void validateAndSave(String currentUsername, Long menuId, String collection, List<JsonNode> content) {
         User currentUser = userRepository.findByUsername(currentUsername).orElseThrow(
-                () -> new ResourceNotFoundException("User not found")
-        );
+                () -> new ResourceNotFoundException("User not found"));
 
         Menu menu = menuRepository.findById(menuId)
                 .orElseThrow(() -> new ResourceNotFoundException("Menu not found"));
@@ -66,16 +68,17 @@ public class MenuContentService implements MenuContentUseCase {
                         .ownerId(currentUser.getId())
                         .theme(menu.getSelectedTheme())
                         .collectionName(collection)
+                        .content(new ArrayList<>())
                         .build());
-        menuContent.setContent(content);
+        // menuContent.setContent(content); // Overrides
+        menuContent.getContent().addAll(content); // Appends
         menuContentRepository.save(menuContent);
     }
 
     @Override
     public List<JsonNode> getCollection(String currentUsername, Long menuId, String collection) {
         User currentUser = userRepository.findByUsername(currentUsername).orElseThrow(
-                () -> new ResourceNotFoundException("User not found")
-        );
+                () -> new ResourceNotFoundException("User not found"));
 
         Menu menu = menuRepository.findById(menuId)
                 .orElseThrow(() -> new ResourceNotFoundException("Menu not found"));
@@ -84,7 +87,8 @@ public class MenuContentService implements MenuContentUseCase {
         }
 
         MenuContent menuContent = menuContentRepository.findByMenuIdAndCollectionName(menuId, collection)
-                .orElseThrow(() -> new ResourceNotFoundException("Content for collection %s not found".formatted(collection)));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Content for collection %s not found".formatted(collection)));
 
         return menuContent.getContent();
     }
