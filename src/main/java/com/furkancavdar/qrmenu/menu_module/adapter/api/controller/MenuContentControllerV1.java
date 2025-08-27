@@ -28,8 +28,7 @@ public class MenuContentControllerV1 {
     public ResponseEntity<ApiResponse<Void>> upsert(
             @Valid @PathVariable @NotNull Long menuId,
             @AuthenticationPrincipal UserDetails userDetails,
-            @Valid @RequestBody UpsertMenuContentRequestDto requestDto
-    ) {
+            @Valid @RequestBody UpsertMenuContentRequestDto requestDto) {
         try {
             menuContentUseCase.validateAndSave(userDetails.getUsername(), menuId,
                     requestDto.getCollection(),
@@ -48,8 +47,7 @@ public class MenuContentControllerV1 {
     public ResponseEntity<ApiResponse<List<JsonNode>>> getCollectionContent(
             @Valid @PathVariable @NotNull Long menuId,
             @AuthenticationPrincipal UserDetails userDetails,
-            @Valid @PathVariable @NotBlank String collection
-    ) {
+            @Valid @PathVariable @NotBlank String collection) {
         try {
             List<JsonNode> content = menuContentUseCase.getCollection(userDetails.getUsername(), menuId,
                     collection);
