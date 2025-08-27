@@ -1,12 +1,5 @@
 package com.furkancavdar.qrmenu.menu_module.application.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.stereotype.Service;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.furkancavdar.qrmenu.auth.application.port.out.UserRepositoryPort;
 import com.furkancavdar.qrmenu.auth.domain.User;
@@ -19,9 +12,15 @@ import com.furkancavdar.qrmenu.menu_module.domain.MenuContent;
 import com.networknt.schema.JsonSchemaException;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.ValidationMessage;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -91,5 +90,39 @@ public class MenuContentService implements MenuContentUseCase {
                         "Content for collection %s not found".formatted(collection)));
 
         return menuContent.getContent();
+    }
+
+    @Override
+    public JsonNode getContent(String currentUsername, Long menuId, String collection, String itemId) {
+        User currentUser = userRepository.findByUsername(currentUsername).orElseThrow(
+                () -> new ResourceNotFoundException("User not found"));
+
+        Menu menu = menuRepository.findById(menuId)
+                .orElseThrow(() -> new ResourceNotFoundException("Menu not found"));
+        if (!menu.getOwner().getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("Not your menu");
+        }
+
+        MenuContent menuContent = menuContentRepository.findByMenuIdAndCollectionName(menuId, collection)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Content for collection %s not found".formatted(collection)));
+
+        JsonNode selectedThemeSchema = menu.getSelectedTheme().getThemeSchemas().get(collection);
+        if (!selectedThemeSchema.get("definitions").get(collection).get("properties").has("id")) {
+            throw new IllegalArgumentException("Schema does not contain 'id' field.");
+        }
+
+        Optional<JsonNode> content = menuContent.getContent().stream()
+                .filter(node -> {
+                    String id = node.get("id").asText();
+                    return id.equals(itemId);
+                })
+                .findAny();
+
+        if (content.isEmpty()) {
+            throw new ResourceNotFoundException("Content item not found");
+        }
+
+        return content.get();
     }
 }

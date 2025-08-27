@@ -3,6 +3,7 @@ package com.furkancavdar.qrmenu.common.exception;
 import com.furkancavdar.qrmenu.auth.application.exception.SessionOwnerException;
 import com.furkancavdar.qrmenu.common.ApiResponse;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -52,6 +54,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ApiResponse<String> handleAccessDeniedException(AccessDeniedException ex) {
+        log.error("Access denied exception: {}", ex.getMessage());
         return ApiResponse.error("Access denied: " + ex.getMessage());
     }
 
@@ -77,12 +80,20 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiResponse<String> handleResourceNotFoundException(ResourceNotFoundException ex) {
+        log.error("Resouce not found exception: {}", ex.getMessage());
         return ApiResponse.error(ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiResponse<String> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
+        return ApiResponse.error(ex.getMessage());
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponse<String> handleIllegalArgumentException(IllegalArgumentException ex) {
+        log.error("Illegal argument exception: {}", ex.getMessage());
         return ApiResponse.error(ex.getMessage());
     }
 }
