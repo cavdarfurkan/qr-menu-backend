@@ -19,4 +19,14 @@ public interface MenuContentUseCase {
      * @return {@link JsonNode}
      */
     JsonNode getContent(String currentUsername, Long menuId, String collection, String itemId);
+
+    /**
+     * @param currentUsername Username of the owner
+     * @param menuId          ID of the menu
+     * @param collection      Collection name
+     * @param itemId          ID of the content's item
+     * @param newContent      New content as JSON
+     * @return {@link JsonNode} - Updated content
+     */
+    JsonNode updateContent(String currentUsername, Long menuId, String collection, String itemId, JsonNode newContent);
 }

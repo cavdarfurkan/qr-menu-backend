@@ -2,11 +2,11 @@ package com.furkancavdar.qrmenu.common.exception;
 
 import com.furkancavdar.qrmenu.auth.application.exception.SessionOwnerException;
 import com.furkancavdar.qrmenu.common.ApiResponse;
+import com.networknt.schema.JsonSchemaException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
@@ -59,10 +59,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<String>> handleGenericException(Exception ex) {
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("Internal server error: " + ex.getMessage()));
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ApiResponse<String> handleGenericException(Exception ex) {
+        log.error("Internal server error. Exception: {} ", ex.getMessage());
+        return ApiResponse.error(ex.getMessage());
     }
 
     @ExceptionHandler(NotImplementedException.class)
@@ -80,7 +80,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiResponse<String> handleResourceNotFoundException(ResourceNotFoundException ex) {
-        log.error("Resouce not found exception: {}", ex.getMessage());
+        log.error("Resource not found exception: {}", ex.getMessage());
         return ApiResponse.error(ex.getMessage());
     }
 
@@ -94,6 +94,13 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiResponse<String> handleIllegalArgumentException(IllegalArgumentException ex) {
         log.error("Illegal argument exception: {}", ex.getMessage());
+        return ApiResponse.error(ex.getMessage());
+    }
+
+    @ExceptionHandler(JsonSchemaException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponse<String> handleJsonSchemaException(JsonSchemaException ex) {
+        log.error("JsonSchema exception: {}", ex.getMessage());
         return ApiResponse.error(ex.getMessage());
     }
 }
