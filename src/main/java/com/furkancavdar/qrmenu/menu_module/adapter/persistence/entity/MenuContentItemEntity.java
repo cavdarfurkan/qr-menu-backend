@@ -12,23 +12,23 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 
-import java.time.Instant;
-import java.util.List;
+import java.time.OffsetDateTime;
+import java.util.UUID;
 
-@Entity
-@Table(
-        name = "menu_content",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"menu_id", "collection_name"})
-)
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class MenuContentEntity {
+@Getter
+@Setter
+@Entity
+@Table(name = "menu_content_item", indexes = {
+        @Index(name = "idx_item_menu_collection", columnList = "menu_id, collection_name")
+})
+public class MenuContentItemEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", nullable = false, updatable = false)
-    private Long id;
+    @JdbcTypeCode(SqlTypes.UUID)
+    private UUID id;
 
     @ManyToOne(cascade = CascadeType.REMOVE, optional = false)
     @JoinColumn(name = "menu_id", nullable = false)
@@ -44,17 +44,16 @@ public class MenuContentEntity {
     @Column(name = "collection_name", nullable = false)
     private String collectionName;
 
-    @Column(name = "content_json", nullable = false)
+    @Column(name = "data", nullable = false, columnDefinition = "jsonb")
     @JdbcTypeCode(SqlTypes.JSON)
-    private List<JsonNode> contentJson;
+    private JsonNode data;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMPTZ")
-    private Instant createdAt;
+    private OffsetDateTime createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMPTZ")
-    private Instant updatedAt;
-
+    private OffsetDateTime updatedAt;
 
 }

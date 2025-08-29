@@ -1,0 +1,246 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1756488848857-12
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: menu_content
+            constraintName: fk_menu_content_on_menu
+  - changeSet:
+      id: 1756488848857-13
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: menu_content
+            constraintName: fk_menu_content_on_theme
+  - changeSet:
+      id: 1756488848857-1
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_menu_content_item
+                  name: id
+                  type: UUID
+              - column:
+                  constraints:
+                    nullable: false
+                  name: menu_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: owner_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: theme_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: collection_name
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: data
+                  type: jsonb
+              - column:
+                  constraints:
+                    nullable: false
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+              - column:
+                  constraints:
+                    nullable: false
+                  name: updated_at
+                  type: TIMESTAMPTZ
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+            tableName: menu_content_item
+  - changeSet:
+      id: 1756488848857-2
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_menu_content_relation
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: source_item_id
+                  type: UUID
+              - column:
+                  constraints:
+                    nullable: false
+                  name: field_name
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: target_item_id
+                  type: UUID
+              - column:
+                  name: position
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+            tableName: menu_content_relation
+  - changeSet:
+      id: 1756488848857-3
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addUniqueConstraint:
+            columnNames: source_item_id, field_name, target_item_id
+            constraintName: uc_menu_content_relation_unique
+            tableName: menu_content_relation
+  - changeSet:
+      id: 1756488848857-4a
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: menu_id
+              - column:
+                  name: collection_name
+            indexName: idx_item_menu_collection
+            tableName: menu_content_item
+  - changeSet:
+      id: 1756488848857-5
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createIndex:
+            columns:
+              - column:
+                  name: source_item_id
+              - column:
+                  name: field_name
+              - column:
+                  name: position
+            indexName: idx_rel_src
+            tableName: menu_content_relation
+  - changeSet:
+      id: 1756488848857-8
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: menu_id
+            baseTableName: menu_content_item
+            constraintName: FK_MENU_CONTENT_ITEM_ON_MENU
+            referencedColumnNames: id
+            referencedTableName: menu
+  - changeSet:
+      id: 1756488848857-9
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: theme_id
+            baseTableName: menu_content_item
+            constraintName: FK_MENU_CONTENT_ITEM_ON_THEME
+            referencedColumnNames: id
+            referencedTableName: theme
+  - changeSet:
+      id: 1756488848857-10
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: source_item_id
+            baseTableName: menu_content_relation
+            constraintName: FK_MENU_CONTENT_RELATION_ON_SOURCE_ITEM
+            referencedColumnNames: id
+            referencedTableName: menu_content_item
+            onDelete: CASCADE
+  - changeSet:
+      id: 1756488848857-11
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: target_item_id
+            baseTableName: menu_content_relation
+            constraintName: FK_MENU_CONTENT_RELATION_ON_TARGET_ITEM
+            referencedColumnNames: id
+            referencedTableName: menu_content_item
+            onDelete: CASCADE
+        - createIndex:
+            columns:
+              - column:
+                  name: target_item_id
+            indexName: idx_rel_tgt
+            tableName: menu_content_relation
+  # Postgres-specific: JSONB GIN index
+  - changeSet:
+      id: 1756488848857-4b
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - sql:
+            splitStatements: false
+            stripComments: true
+            sql: |
+              CREATE INDEX IF NOT EXISTS idx_item_data_gin
+              ON menu_content_item
+              USING gin (data jsonb_path_ops);
+  # Keep positions unique per list
+  - changeSet:
+      id: 1756488848857-6
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - sql:
+            splitStatements: false
+            stripComments: true
+            sql: |
+              CREATE UNIQUE INDEX IF NOT EXISTS ux_rel_src_field_position
+              ON menu_content_relation (source_item_id, field_name, position)
+              WHERE position IS NOT NULL;
+  # Ensure data is an object (not an array)
+  - changeSet:
+      id: 1756488848857-7
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - sql:
+            splitStatements: false
+            stripComments: true
+            sql: |
+              ALTER TABLE menu_content_item
+              ADD CONSTRAINT ck_item_data_is_object
+              CHECK (jsonb_typeof(data) = 'object');
+  - changeSet:
+      id: 1756488848857-15
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - dropTable:
+            cascadeConstraints: true
+            tableName: menu_content
+

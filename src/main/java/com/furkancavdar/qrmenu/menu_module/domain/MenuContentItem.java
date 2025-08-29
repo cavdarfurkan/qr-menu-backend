@@ -7,30 +7,30 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.util.List;
+import java.util.UUID;
 
 @Getter
 @ToString
 @Builder
-public class MenuContent {
-    private Long id;
+public class MenuContentItem {
+    private UUID id;
     private final Menu menu;
     private final Long ownerId;
     private final Theme theme;
     private final String collectionName;
     @Setter
-    private List<JsonNode> content;
+    private JsonNode data;
 
-    public MenuContent(Menu menu, Long ownerId, Theme theme, String collectionName, List<JsonNode> content) {
+    public MenuContentItem(Menu menu, Long ownerId, Theme theme, String collectionName, JsonNode data) {
         this.menu = menu;
         this.ownerId = ownerId;
         this.theme = theme;
         this.collectionName = collectionName;
-        this.content = content;
+        this.data = data;
     }
 
-    public MenuContent(Long id, Menu menu, Long ownerId, Theme theme, String collectionName, List<JsonNode> content) {
-        this(menu, ownerId, theme, collectionName, content);
+    public MenuContentItem(UUID id, Menu menu, Long ownerId, Theme theme, String collectionName, JsonNode data) {
+        this(menu, ownerId, theme, collectionName, data);
         this.id = id;
     }
 }

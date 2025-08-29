@@ -10,15 +10,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class UpsertMenuContentRequestDto {
+public class AddMenuContentRequestDto {
     @NotBlank
     private String collection;
 
     @NotNull
-    private List<JsonNode> content;
+    private JsonNode content;
+
+    private Map<@NotBlank String, @NotNull List<UUID>> relations; // field -> ordered targets
 }

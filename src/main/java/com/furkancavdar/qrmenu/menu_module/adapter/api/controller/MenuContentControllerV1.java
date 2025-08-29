@@ -2,9 +2,12 @@ package com.furkancavdar.qrmenu.menu_module.adapter.api.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.furkancavdar.qrmenu.common.ApiResponse;
+import com.furkancavdar.qrmenu.menu_module.adapter.api.dto.mapper.HydratedItemResponseMapper;
+import com.furkancavdar.qrmenu.menu_module.adapter.api.dto.payload.request.AddMenuContentRequestDto;
 import com.furkancavdar.qrmenu.menu_module.adapter.api.dto.payload.request.UpdateMenuContentRequestDto;
-import com.furkancavdar.qrmenu.menu_module.adapter.api.dto.payload.request.UpsertMenuContentRequestDto;
+import com.furkancavdar.qrmenu.menu_module.adapter.api.dto.payload.response.HydratedItemResponseDto;
 import com.furkancavdar.qrmenu.menu_module.application.port.in.MenuContentUseCase;
+import com.furkancavdar.qrmenu.menu_module.application.port.in.dto.HydratedItemDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -16,6 +19,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -26,16 +30,46 @@ public class MenuContentControllerV1 {
     private final MenuContentUseCase menuContentUseCase;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Void>> upsert(
+    public ResponseEntity<ApiResponse<HydratedItemResponseDto>> addContent(
             @Valid @PathVariable @NotNull Long menuId,
             @AuthenticationPrincipal UserDetails userDetails,
-            @Valid @RequestBody UpsertMenuContentRequestDto requestDto
+            @Valid @RequestBody AddMenuContentRequestDto requestDto
     ) {
-        menuContentUseCase.validateAndSave(userDetails.getUsername(), menuId,
+        HydratedItemDto newContent = menuContentUseCase.createContent(
+                userDetails.getUsername(),
+                menuId,
                 requestDto.getCollection(),
-                requestDto.getContent());
-        log.info("MenuContentControllerV1:upsert menu content is saved/updated");
-        return ResponseEntity.ok(ApiResponse.success("Menu content saved/updated successfully"));
+                requestDto.getContent(),
+                requestDto.getRelations()
+        );
+
+        log.info("MenuContentControllerV1:addContent menu content is saved/updated");
+        return ResponseEntity.ok(ApiResponse.success(
+                "Menu content saved/updated successfully",
+                HydratedItemResponseMapper.fromHydratedItemDto(newContent)
+        ));
+    }
+
+    @PutMapping("/{collection}/{itemId}")
+    public ResponseEntity<ApiResponse<HydratedItemResponseDto>> updateContent(
+            @Valid @PathVariable @NotNull Long menuId,
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @PathVariable @NotBlank String collection,
+            @Valid @PathVariable @NotBlank String itemId,
+            @Valid @RequestBody UpdateMenuContentRequestDto updateMenuContentRequestDto
+    ) {
+        HydratedItemDto updatedContent = menuContentUseCase.updateContent(
+                userDetails.getUsername(),
+                menuId,
+                collection,
+                UUID.fromString(itemId),
+                updateMenuContentRequestDto.getNewContent(),
+                updateMenuContentRequestDto.getRelations()
+        );
+
+        return ResponseEntity.ok(ApiResponse.success(
+                HydratedItemResponseMapper.fromHydratedItemDto(updatedContent)
+        ));
     }
 
     @GetMapping("/{collection}")
@@ -56,25 +90,7 @@ public class MenuContentControllerV1 {
             @Valid @PathVariable @NotBlank String collection,
             @Valid @PathVariable @NotBlank String itemId
     ) {
-        JsonNode content = menuContentUseCase.getContent(userDetails.getUsername(), menuId, collection, itemId);
+        JsonNode content = menuContentUseCase.getContent(userDetails.getUsername(), menuId, collection, UUID.fromString(itemId));
         return ResponseEntity.ok(ApiResponse.success(content));
-    }
-
-    @PutMapping("/{collection}/{itemId}")
-    public ResponseEntity<ApiResponse<JsonNode>> updateContent(
-            @Valid @PathVariable @NotNull Long menuId,
-            @AuthenticationPrincipal UserDetails userDetails,
-            @Valid @PathVariable @NotBlank String collection,
-            @Valid @PathVariable @NotBlank String itemId,
-            @Valid @RequestBody UpdateMenuContentRequestDto updateMenuContentRequestDto
-    ) {
-        JsonNode updatedContent = menuContentUseCase.updateContent(
-                userDetails.getUsername(),
-                menuId,
-                collection,
-                itemId,
-                updateMenuContentRequestDto.getNewContent()
-        );
-        return ResponseEntity.ok(ApiResponse.success(updatedContent));
     }
 }

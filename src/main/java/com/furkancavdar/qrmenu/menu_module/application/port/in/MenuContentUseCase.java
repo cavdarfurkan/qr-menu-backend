@@ -1,11 +1,28 @@
 package com.furkancavdar.qrmenu.menu_module.application.port.in;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.furkancavdar.qrmenu.menu_module.application.port.in.dto.HydratedItemDto;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public interface MenuContentUseCase {
-    void validateAndSave(String currentUsername, Long menuId, String collection, List<JsonNode> content);
+    @Transactional
+    HydratedItemDto createContent(String currentUsername, Long menuId, String collection, JsonNode content, Map<String, List<UUID>> relations);
+
+    /**
+     * @param currentUsername Username of the owner
+     * @param menuId          ID of the menu
+     * @param collection      Collection name
+     * @param itemId          UUID of the content's item
+     * @param newContent      New content as JSON
+     * @param newRelations    New relations of the content
+     * @return {@link JsonNode} - Updated content
+     */
+    @Transactional
+    HydratedItemDto updateContent(String currentUsername, Long menuId, String collection, UUID itemId, JsonNode newContent, Map<String, List<UUID>> newRelations);
 
     List<JsonNode> getCollection(String currentUsername, Long menuId, String collection);
 
@@ -18,15 +35,8 @@ public interface MenuContentUseCase {
      * @param itemId          ID of the content's item
      * @return {@link JsonNode}
      */
-    JsonNode getContent(String currentUsername, Long menuId, String collection, String itemId);
+    JsonNode getContent(String currentUsername, Long menuId, String collection, UUID itemId);
 
-    /**
-     * @param currentUsername Username of the owner
-     * @param menuId          ID of the menu
-     * @param collection      Collection name
-     * @param itemId          ID of the content's item
-     * @param newContent      New content as JSON
-     * @return {@link JsonNode} - Updated content
-     */
-    JsonNode updateContent(String currentUsername, Long menuId, String collection, String itemId, JsonNode newContent);
+    @Transactional
+    HydratedItemDto hydrate(UUID itemId);
 }
