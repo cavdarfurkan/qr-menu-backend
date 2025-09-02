@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.furkancavdar.qrmenu.menu_module.adapter.api.dto.payload.queue.BuildMenuJobDto;
 import io.lettuce.core.ClientOptions;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
@@ -21,6 +22,12 @@ import java.time.Duration;
 @Configuration
 public class RedisConfig {
 
+    @Value("${spring.data.redis.host}")
+    private String host;
+
+    @Value("${spring.data.redis.port}")
+    private int port;
+
     // This is needed to avoid Redis CONFIG command issues in some environments
 //    @Bean
 //    public ConfigureRedisAction configureRedisAction() {
@@ -29,7 +36,7 @@ public class RedisConfig {
 
     @Bean
     public LettuceConnectionFactory connectionFactory() {
-        RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration("localhost", 6379);
+        RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration(host, port);
 
         LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
                 .commandTimeout(Duration.ofMinutes(0))

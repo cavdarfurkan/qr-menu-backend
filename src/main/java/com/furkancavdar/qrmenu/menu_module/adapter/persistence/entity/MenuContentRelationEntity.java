@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.OffsetDateTime;
@@ -28,16 +27,14 @@ public class MenuContentRelationEntity {
     @Column(name = "id", nullable = false, updatable = false)
     private Long id;
 
-    @Cascade(org.hibernate.annotations.CascadeType.REMOVE)
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "source_item_id", nullable = false)
     private MenuContentItemEntity sourceItem;
 
     @Column(name = "field_name", nullable = false)
     private String fieldName;
 
-    @Cascade(org.hibernate.annotations.CascadeType.REMOVE)
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "target_item_id", nullable = false)
     private MenuContentItemEntity targetItem;
 

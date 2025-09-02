@@ -30,7 +30,7 @@ public class MenuContentItemEntity {
     @JdbcTypeCode(SqlTypes.UUID)
     private UUID id;
 
-    @ManyToOne(cascade = CascadeType.REMOVE, optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "menu_id", nullable = false)
     private MenuEntity menu;
 
