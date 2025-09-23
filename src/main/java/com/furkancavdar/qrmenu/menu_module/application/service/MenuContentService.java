@@ -121,7 +121,8 @@ public class MenuContentService implements MenuContentUseCase {
     }
 
     @Override
-    public List<JsonNode> getCollection(String currentUsername, Long menuId, String collection) {
+    @Transactional
+    public List<HydratedItemDto> getCollectionContent(String currentUsername, Long menuId, String collection) {
         validateUserAndMenu(currentUsername, menuId, collection);
 
         List<MenuContentItem> menuContentItem = menuContentRepository.findByMenuIdAndCollectionName(menuId, collection);
@@ -130,19 +131,21 @@ public class MenuContentService implements MenuContentUseCase {
         }
 
         return menuContentItem.stream()
-                .map(MenuContentItem::getData)
+                .map(MenuContentItem::getId)
+                .map(this::hydrate)
                 .toList();
     }
 
     @Override
-    public JsonNode getContent(String currentUsername, Long menuId, String collection, UUID itemId) {
+    @Transactional
+    public HydratedItemDto getContent(String currentUsername, Long menuId, String collection, UUID itemId) {
         ValidateResult validateResult = validateUserAndMenu(currentUsername, menuId, collection);
 
         MenuContentItem menuContentItem = menuContentRepository.findByMenuIdAndCollectionNameAndId(menuId, collection, itemId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Content with id %s not found in collection %s".formatted(itemId, collection)));
 
-        return menuContentItem.getData();
+        return hydrate(menuContentItem.getId());
     }
 
     @Override

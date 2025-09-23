@@ -69,7 +69,7 @@ public class MenuContentControllerTest {
     private static Menu menu;
 
     @Test
-    public void create_then_get_hydrated() throws Exception {
+    public void create_content_with_relation() throws Exception {
         setup();
 
         // Create a category
@@ -88,20 +88,23 @@ public class MenuContentControllerTest {
                 "relations", Map.of("category", List.of(category.getId().toString()))
         );
 
-        var res = mvc.perform(post("/api/v1/menu/{menuId}/content", menu.getId())
+        mvc.perform(post("/api/v1/menu/{menuId}/content", menu.getId())
                         .contentType(MediaType.APPLICATION_JSON.toString())
                         .content(mapper.writeValueAsBytes(body))
                         .header("Authorization", "Bearer " + accessToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.collectionName", is("product")))
+                .andExpect(jsonPath("$.data.collection_name", is("product")))
                 .andExpect(jsonPath("$.data.resolved.category[0].slug", is("coffee")))
                 .andReturn();
 
-        var id = mapper.readTree(res.getResponse().getContentAsByteArray()).get("data").get("id").asText();
-        mvc.perform(get("/api/v1/menu/{menuId}/content/{collection}/{itemId}", menu.getId(), "product", id)
-                        .header("Authorization", "Bearer " + accessToken))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.id", is(id)));
+//        var id = mapper.readTree(res.getResponse().getContentAsByteArray()).get("data").get("id").asText();
+//        mvc.perform(get("/api/v1/menu/{menuId}/content/{collection}/{itemId}", menu.getId(), "product", id)
+//                        .header("Authorization", "Bearer " + accessToken))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.success", is(true)))
+//                .andExpect(jsonPath("$.message", is("Success")))
+//                .andExpect(jsonPath("$.data.name", is("Espresso")))
+//                .andExpect(jsonPath("$.data.price", is(45)));
     }
 
     @Test
@@ -118,7 +121,7 @@ public class MenuContentControllerTest {
                         .content(mapper.writeValueAsBytes(createBody))
                         .header("Authorization", "Bearer " + accessToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.collectionName", is("category")))
+                .andExpect(jsonPath("$.data.collection_name", is("category")))
                 .andReturn();
 
         var contentId = mapper.readTree(res.getResponse().getContentAsByteArray()).get("data").get("id").asText();
@@ -133,7 +136,7 @@ public class MenuContentControllerTest {
                         .header("Authorization", "Bearer " + accessToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id", is(contentId)))
-                .andExpect(jsonPath("$.data.collectionName", is("category")))
+                .andExpect(jsonPath("$.data.collection_name", is("category")))
                 .andExpect(jsonPath("$.data.data.slug", is("updated-coffee")))
                 .andReturn();
     }
@@ -153,7 +156,60 @@ public class MenuContentControllerTest {
     @Test
     public void get_hydrated_content() throws Exception {
         setup();
-        Assertions.fail("Not yet implemented");
+
+        // Create a category item
+        var categoryBody = Map.of(
+                "collection", "category",
+                "content", Map.of("name", "Coffee", "slug", "coffee")
+        );
+
+        var categoryRes = mvc.perform(post("/api/v1/menu/{menuId}/content", menu.getId())
+                        .contentType(MediaType.APPLICATION_JSON.toString())
+                        .content(mapper.writeValueAsBytes(categoryBody))
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        var categoryId = mapper.readTree(categoryRes.getResponse().getContentAsByteArray()).get("data").get("id").asText();
+
+        // Create a product item
+        var productBody = Map.of(
+                "collection", "product",
+                "content", Map.of("name", "Espresso", "price", 45),
+                "relations", Map.of("category", List.of(categoryId))
+        );
+
+        var productRes = mvc.perform(post("/api/v1/menu/{menuId}/content", menu.getId())
+                        .contentType(MediaType.APPLICATION_JSON.toString())
+                        .content(mapper.writeValueAsBytes(productBody))
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        var productId = mapper.readTree(productRes.getResponse().getContentAsByteArray()).get("data").get("id").asText();
+
+        // Test: Get category content by its correct collection
+        mvc.perform(get("/api/v1/menu/{menuId}/content/{collection}/{itemId}", menu.getId(), "category", categoryId)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.data.slug", is("coffee")));
+
+        // Test: Get product content by its correct collection
+        mvc.perform(get("/api/v1/menu/{menuId}/content/{collection}/{itemId}", menu.getId(), "product", productId)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.data.name", is("Espresso")))
+                .andExpect(jsonPath("$.data.data.price", is(45)));
+
+        // Test: Try to get category content using wrong collection - should fail
+        mvc.perform(get("/api/v1/menu/{menuId}/content/{collection}/{itemId}", menu.getId(), "product", categoryId)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isNotFound());
+
+        // Test: Try to get product content using wrong collection - should fail
+        mvc.perform(get("/api/v1/menu/{menuId}/content/{collection}/{itemId}", menu.getId(), "category", productId)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isNotFound());
     }
 
     @DynamicPropertySource

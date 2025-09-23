@@ -24,7 +24,8 @@ public interface MenuContentUseCase {
     @Transactional
     HydratedItemDto updateContent(String currentUsername, Long menuId, String collection, UUID itemId, JsonNode newContent, Map<String, List<UUID>> newRelations);
 
-    List<JsonNode> getCollection(String currentUsername, Long menuId, String collection);
+    @Transactional
+    List<HydratedItemDto> getCollectionContent(String currentUsername, Long menuId, String collection);
 
     /**
      * Get single menu content
@@ -35,7 +36,8 @@ public interface MenuContentUseCase {
      * @param itemId          ID of the content's item
      * @return {@link JsonNode}
      */
-    JsonNode getContent(String currentUsername, Long menuId, String collection, UUID itemId);
+    @Transactional
+    HydratedItemDto getContent(String currentUsername, Long menuId, String collection, UUID itemId);
 
     @Transactional
     HydratedItemDto hydrate(UUID itemId);

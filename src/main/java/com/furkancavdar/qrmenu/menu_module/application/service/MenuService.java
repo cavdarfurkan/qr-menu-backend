@@ -9,6 +9,7 @@ import com.furkancavdar.qrmenu.menu_module.application.port.in.MenuContentUseCas
 import com.furkancavdar.qrmenu.menu_module.application.port.in.MenuJobUseCase;
 import com.furkancavdar.qrmenu.menu_module.application.port.in.MenuUseCase;
 import com.furkancavdar.qrmenu.menu_module.application.port.in.dto.BuildMenuResultDto;
+import com.furkancavdar.qrmenu.menu_module.application.port.in.dto.HydratedItemDto;
 import com.furkancavdar.qrmenu.menu_module.application.port.in.dto.MenuDto;
 import com.furkancavdar.qrmenu.menu_module.application.port.in.dto.UserMenuDto;
 import com.furkancavdar.qrmenu.menu_module.application.port.in.mapper.MenuDtoMapper;
@@ -81,23 +82,15 @@ public class MenuService implements MenuUseCase {
             throw new RuntimeException(ownerName + " is not the owner of menu " + menu.getMenuName());
         }
 
-        Map<String, List<JsonNode>> menuContents = menu.getSelectedTheme().getThemeManifest().getContentTypes().stream()
+        Map<String, List<HydratedItemDto>> menuContents = menu.getSelectedTheme().getThemeManifest().getContentTypes().stream()
                 .map((node) -> node.get("name").asText())
                 .collect(Collectors.toMap(
                         collection -> collection,
-                        collection -> menuContentUseCase.getCollection(ownerName, menuId, collection)
+                        collection -> menuContentUseCase.getCollectionContent(ownerName, menuId, collection)
                 ));
 
         String jobId = UUID.randomUUID().toString();
         String statusUrl = baseUrl + "/api/v1/menu/job/" + jobId;
-//        String siteName = "%s-%s".formatted(menu.getMenuName(), ownerName).toLowerCase()
-//                // Replace spaces and invalid characters with hyphen
-//                .replaceAll("[^a-z0-9-]", "-")
-//                // Remove leading and trailing hyphens
-//                .replaceAll("^-+", "").replaceAll("-+$", "")
-//                // Replace multiple hyphens with a single one
-//                .replaceAll("-{2,}", "-");
-
         String siteName = DnsNameFormatter.toDnsLabel("%s-%s".formatted(menu.getMenuName(), ownerName));
 
         BuildMenuJobDto job = BuildMenuJobDto.builder()

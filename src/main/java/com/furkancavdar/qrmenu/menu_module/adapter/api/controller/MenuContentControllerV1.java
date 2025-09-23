@@ -1,6 +1,5 @@
 package com.furkancavdar.qrmenu.menu_module.adapter.api.controller;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.furkancavdar.qrmenu.common.ApiResponse;
 import com.furkancavdar.qrmenu.menu_module.adapter.api.dto.mapper.HydratedItemResponseMapper;
 import com.furkancavdar.qrmenu.menu_module.adapter.api.dto.payload.request.AddMenuContentRequestDto;
@@ -73,24 +72,28 @@ public class MenuContentControllerV1 {
     }
 
     @GetMapping("/{collection}")
-    public ResponseEntity<ApiResponse<List<JsonNode>>> getCollectionContent(
+    public ResponseEntity<ApiResponse<List<HydratedItemResponseDto>>> getCollectionContent(
             @Valid @PathVariable @NotNull Long menuId,
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @PathVariable @NotBlank String collection
     ) {
-        List<JsonNode> content = menuContentUseCase.getCollection(userDetails.getUsername(), menuId,
+        List<HydratedItemDto> content = menuContentUseCase.getCollectionContent(userDetails.getUsername(), menuId,
                 collection);
-        return ResponseEntity.ok(ApiResponse.success(content));
+        return ResponseEntity.ok(ApiResponse.success(
+                content.stream().map(HydratedItemResponseMapper::fromHydratedItemDto).toList()
+        ));
     }
 
     @GetMapping("/{collection}/{itemId}")
-    public ResponseEntity<ApiResponse<JsonNode>> getContent(
+    public ResponseEntity<ApiResponse<HydratedItemResponseDto>> getContent(
             @Valid @PathVariable @NotNull Long menuId,
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @PathVariable @NotBlank String collection,
             @Valid @PathVariable @NotBlank String itemId
     ) {
-        JsonNode content = menuContentUseCase.getContent(userDetails.getUsername(), menuId, collection, UUID.fromString(itemId));
-        return ResponseEntity.ok(ApiResponse.success(content));
+        HydratedItemDto content = menuContentUseCase.getContent(userDetails.getUsername(), menuId, collection, UUID.fromString(itemId));
+        return ResponseEntity.ok(ApiResponse.success(
+                HydratedItemResponseMapper.fromHydratedItemDto(content)
+        ));
     }
 }

@@ -1,8 +1,8 @@
 package com.furkancavdar.qrmenu.menu_module.adapter.api.dto.payload.queue;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.furkancavdar.qrmenu.menu_module.application.port.in.dto.HydratedItemDto;
 import lombok.Builder;
 import lombok.ToString;
 
@@ -17,12 +17,14 @@ public class BuildMenuJobDto {
 
     private String siteName;
 
-    /**
-     * key: collection
-     * <p>
-     * value: json payload
-     */
-    private Map<String, List<JsonNode>> contents;
+//    /**
+//     * key: collection
+//     * <p>
+//     * value: json payload
+//     */
+//    private Map<String, List<JsonNode>> contents;
+
+    private Map<String, List<HydratedItemDto>> contents;
 
     private String statusUrl;
 
