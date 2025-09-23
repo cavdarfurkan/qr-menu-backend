@@ -4,18 +4,19 @@ import com.furkancavdar.qrmenu.menu_module.adapter.persistence.entity.MenuConten
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 public interface JpaMenuContentItemRepository extends JpaRepository<MenuContentItemEntity, UUID> {
-
-//    Optional<MenuContentItemEntity> findByMenu_IdAndCollectionName(Long id, String collectionName);
 
 //    @Query("select m from MenuContentItemEntity m where m.id in ?1")
 //    List<MenuContentItemEntity> findAllByIdIn(Collection<UUID> ids);
 
 
     List<MenuContentItemEntity> findByMenu_IdAndCollectionName(Long menuId, String collectionName);
+
+    Optional<MenuContentItemEntity> findByMenu_IdAndCollectionNameAndId(Long menuId, String collectionName, UUID itemId);
 
     List<MenuContentItemEntity> findAllByIdIn(Set<UUID> ids);
 }

@@ -138,9 +138,9 @@ public class MenuContentService implements MenuContentUseCase {
     public JsonNode getContent(String currentUsername, Long menuId, String collection, UUID itemId) {
         ValidateResult validateResult = validateUserAndMenu(currentUsername, menuId, collection);
 
-        MenuContentItem menuContentItem = menuContentRepository.findById(itemId)
+        MenuContentItem menuContentItem = menuContentRepository.findByMenuIdAndCollectionNameAndId(menuId, collection, itemId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Content for collection %s not found".formatted(collection)));
+                        "Content with id %s not found in collection %s".formatted(itemId, collection)));
 
         return menuContentItem.getData();
     }

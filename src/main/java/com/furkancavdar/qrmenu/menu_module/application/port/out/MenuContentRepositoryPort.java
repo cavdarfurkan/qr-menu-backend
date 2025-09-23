@@ -24,6 +24,8 @@ public interface MenuContentRepositoryPort {
 
     List<MenuContentItem> findByMenuIdAndCollectionName(Long menuId, String collectionName);
 
+    Optional<MenuContentItem> findByMenuIdAndCollectionNameAndId(Long menuId, String collectionName, UUID itemId);
+
     List<MenuContentItem> findAllByIdIn(Set<UUID> ids);
 
     /*
