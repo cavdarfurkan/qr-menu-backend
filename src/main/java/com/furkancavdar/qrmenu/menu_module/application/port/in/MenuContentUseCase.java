@@ -41,4 +41,26 @@ public interface MenuContentUseCase {
 
     @Transactional
     HydratedItemDto hydrate(UUID itemId);
+
+    /**
+     * Delete menu content item
+     *
+     * @param currentUsername Username of the owner
+     * @param menuId          ID of the menu
+     * @param collection      Collection name
+     * @param itemId          ID of the content's item
+     */
+    @Transactional
+    void deleteContent(String currentUsername, Long menuId, String collection, UUID itemId);
+
+    /**
+     * Delete multiple menu content items
+     *
+     * @param currentUsername Username of the owner
+     * @param menuId          ID of the menu
+     * @param collection      Collection name
+     * @param itemIds         List of IDs for content items to delete
+     */
+    @Transactional
+    void deleteContentBulk(String currentUsername, Long menuId, String collection, List<UUID> itemIds);
 }

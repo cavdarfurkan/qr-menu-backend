@@ -41,4 +41,8 @@ public interface MenuContentRepositoryPort {
     List<MenuContentRelation> findBySourceItemId(UUID sourceItemId);
 
     List<MenuContentRelation> findBySourceItemIdAndFieldNameOrderByPositionAsc(UUID sourceItemId, String fieldName);
+
+    List<MenuContentRelation> findByTargetItemId(UUID targetItemId);
+
+    boolean existsByTargetItemId(UUID targetItemId);
 }

@@ -3,6 +3,7 @@ package com.furkancavdar.qrmenu.menu_module.application.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.furkancavdar.qrmenu.auth.application.port.out.UserRepositoryPort;
 import com.furkancavdar.qrmenu.auth.domain.User;
+import com.furkancavdar.qrmenu.common.exception.ReferencedItemException;
 import com.furkancavdar.qrmenu.common.exception.ResourceNotFoundException;
 import com.furkancavdar.qrmenu.menu_module.application.port.in.MenuContentUseCase;
 import com.furkancavdar.qrmenu.menu_module.application.port.in.dto.HydratedItemDto;
@@ -146,6 +147,79 @@ public class MenuContentService implements MenuContentUseCase {
                         "Content with id %s not found in collection %s".formatted(itemId, collection)));
 
         return hydrate(menuContentItem.getId());
+    }
+
+    @Override
+    @Transactional
+    public void deleteContent(String currentUsername, Long menuId, String collection, UUID itemId) {
+        validateUserAndMenu(currentUsername, menuId, collection);
+
+        MenuContentItem menuContentItem = menuContentRepository.findByMenuIdAndCollectionNameAndId(menuId, collection, itemId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Content with id %s not found in collection %s".formatted(itemId, collection)));
+
+        // Check if this item is referenced as a target by other items
+        if (menuContentRepository.existsByTargetItemId(itemId)) {
+            List<MenuContentRelation> referencingRelations = menuContentRepository.findByTargetItemId(itemId);
+            Set<String> referencingSources = referencingRelations.stream()
+                    .map(rel -> rel.getSourceItem().getCollectionName() + ":" + rel.getSourceItem().getId())
+                    .collect(Collectors.toSet());
+            throw new ReferencedItemException(
+                    "Cannot delete item %s from collection %s: it is referenced by %d other item(s) (%s)"
+                            .formatted(itemId, collection, referencingRelations.size(), 
+                                    String.join(", ", referencingSources)));
+        }
+
+        // Delete the item (cascade delete will handle relations where this item is the source)
+        menuContentRepository.delete(menuContentItem);
+
+        log.info("Deleted menu content item with id {} from collection {}", itemId, collection);
+    }
+
+    @Override
+    @Transactional
+    public void deleteContentBulk(String currentUsername, Long menuId, String collection, List<UUID> itemIds) {
+        if (itemIds == null || itemIds.isEmpty()) {
+            return;
+        }
+
+        validateUserAndMenu(currentUsername, menuId, collection);
+
+        // Fetch all items to validate they exist and belong to the correct menu and collection
+        List<MenuContentItem> items = menuContentRepository.findAllByIdIn(new HashSet<>(itemIds));
+
+        // Validate all items exist
+        if (items.size() != itemIds.size()) {
+            throw new ResourceNotFoundException("One or more items not found");
+        }
+
+        // Validate all items belong to the correct menu and collection
+        boolean invalidItem = items.stream()
+                .anyMatch(item -> !item.getMenu().getId().equals(menuId) ||
+                        !item.getCollectionName().equals(collection));
+        if (invalidItem) {
+            throw new IllegalArgumentException(
+                    "All items must belong to menu %d and collection %s".formatted(menuId, collection));
+        }
+
+        // Check if any of the items are referenced as targets by other items
+        List<UUID> referencedItems = new ArrayList<>();
+        for (UUID itemId : itemIds) {
+            if (menuContentRepository.existsByTargetItemId(itemId)) {
+                referencedItems.add(itemId);
+            }
+        }
+
+        if (!referencedItems.isEmpty()) {
+            throw new ReferencedItemException(
+                    "Cannot delete %d item(s) from collection %s: they are referenced by other items. Referenced items: %s"
+                            .formatted(referencedItems.size(), collection, referencedItems));
+        }
+
+        // Delete all items (cascade delete will handle relations where these items are sources)
+        items.forEach(menuContentRepository::delete);
+
+        log.info("Deleted {} menu content items from collection {}", items.size(), collection);
     }
 
     @Override

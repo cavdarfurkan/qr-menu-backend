@@ -3,6 +3,7 @@ package com.furkancavdar.qrmenu.menu_module.adapter.api.controller;
 import com.furkancavdar.qrmenu.common.ApiResponse;
 import com.furkancavdar.qrmenu.menu_module.adapter.api.dto.mapper.HydratedItemResponseMapper;
 import com.furkancavdar.qrmenu.menu_module.adapter.api.dto.payload.request.AddMenuContentRequestDto;
+import com.furkancavdar.qrmenu.menu_module.adapter.api.dto.payload.request.DeleteMenuContentBulkRequestDto;
 import com.furkancavdar.qrmenu.menu_module.adapter.api.dto.payload.request.UpdateMenuContentRequestDto;
 import com.furkancavdar.qrmenu.menu_module.adapter.api.dto.payload.response.HydratedItemResponseDto;
 import com.furkancavdar.qrmenu.menu_module.application.port.in.MenuContentUseCase;
@@ -94,6 +95,35 @@ public class MenuContentControllerV1 {
         HydratedItemDto content = menuContentUseCase.getContent(userDetails.getUsername(), menuId, collection, UUID.fromString(itemId));
         return ResponseEntity.ok(ApiResponse.success(
                 HydratedItemResponseMapper.fromHydratedItemDto(content)
+        ));
+    }
+
+    @DeleteMapping("/{collection}/{itemId}")
+    public ResponseEntity<ApiResponse<Void>> deleteContent(
+            @Valid @PathVariable @NotNull Long menuId,
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @PathVariable @NotBlank String collection,
+            @Valid @PathVariable @NotBlank String itemId
+    ) {
+        menuContentUseCase.deleteContent(userDetails.getUsername(), menuId, collection, UUID.fromString(itemId));
+        log.info("MenuContentControllerV1:deleteContent menu content deleted successfully");
+        return ResponseEntity.ok(ApiResponse.success(
+                "Menu content deleted successfully"
+        ));
+    }
+
+    @DeleteMapping("/{collection}")
+    public ResponseEntity<ApiResponse<Void>> deleteContentBulk(
+            @Valid @PathVariable @NotNull Long menuId,
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @PathVariable @NotBlank String collection,
+            @Valid @RequestBody DeleteMenuContentBulkRequestDto requestDto
+    ) {
+        List<UUID> uuidList = requestDto.getItemIds().stream().map(UUID::fromString).toList();
+        menuContentUseCase.deleteContentBulk(userDetails.getUsername(), menuId, collection, uuidList);
+        log.info("MenuContentControllerV1:deleteContentBulk {} menu content items deleted successfully", requestDto.getItemIds().size());
+        return ResponseEntity.ok(ApiResponse.success(
+                String.format("%d menu content items deleted successfully", requestDto.getItemIds().size())
         ));
     }
 }

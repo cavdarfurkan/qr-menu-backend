@@ -14,6 +14,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.HashMap;
@@ -51,6 +52,27 @@ public class GlobalExceptionHandler {
         return ApiResponse.error("Validation failed: " + message);
     }
 
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiResponse<Map<String, String>> handleHandlerMethodValidationException(HandlerMethodValidationException ex) {
+        Map<String, String> errors = new HashMap<>();
+
+        // Handle parameter validation errors (e.g., @RequestBody, @PathVariable, @RequestParam)
+        ex.getParameterValidationResults().forEach(parameterResult -> {
+            String parameterName = parameterResult.getMethodParameter().getParameterName();
+            parameterResult.getResolvableErrors().forEach(error -> {
+                String fieldName = error instanceof FieldError
+                        ? ((FieldError) error).getField()
+                        : (parameterName != null ? parameterName : "unknown");
+                String errorMessage = error.getDefaultMessage();
+                errors.put(fieldName, errorMessage);
+            });
+        });
+
+        log.error("Validation failed: {}", errors);
+        return ApiResponse.error("Validation failed", errors);
+    }
+
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ApiResponse<String> handleAccessDeniedException(AccessDeniedException ex) {
@@ -81,6 +103,13 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiResponse<String> handleResourceNotFoundException(ResourceNotFoundException ex) {
         log.error("Resource not found exception: {}", ex.getMessage());
+        return ApiResponse.error(ex.getMessage());
+    }
+
+    @ExceptionHandler(ReferencedItemException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiResponse<String> handleReferencedItemException(ReferencedItemException ex) {
+        log.error("Referenced item exception: {}", ex.getMessage());
         return ApiResponse.error(ex.getMessage());
     }
 

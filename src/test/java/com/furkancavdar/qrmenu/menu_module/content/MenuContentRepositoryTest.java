@@ -166,12 +166,15 @@ public class MenuContentRepositoryTest {
         MenuContentItem t2 = menuContentRepository.save(dummyItem(menu, owner, theme));
 
         menuContentRepository.save(newRel(src, "addons", t1, 0));
-        assertThatThrownBy(() -> menuContentRepository.save(newRel(src, "addons", t2, 0)))
-                .isInstanceOf(DataIntegrityViolationException.class);
+        // The second save with duplicate position should fail
+        MenuContentRelation duplicateRel = newRel(src, "addons", t2, 0);
+        assertThatThrownBy(() -> {
+            menuContentRepository.save(duplicateRel);
+        }).isInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test
-    public void cascadeDelete_removesRelations() {
+    public void cascadeDelete_removesRelationsWhenSourceDeleted() {
         // Create an owner
         User owner = new User("username", "password", "email");
         owner = userRepositoryPort.save(owner);
@@ -199,8 +202,49 @@ public class MenuContentRepositoryTest {
         menuContentRepository.save(newRel(src, "category", tgt, null));
         assertThat(menuContentRepository.findBySourceItemId(src.getId())).hasSize(1);
 
-        menuContentRepository.delete(tgt);
+        // Delete source item - should cascade delete the relation
+        menuContentRepository.delete(src);
         assertThat(menuContentRepository.findBySourceItemId(src.getId())).isEmpty();
+        // Target should still exist
+        assertThat(menuContentRepository.findById(tgt.getId())).isPresent();
+    }
+
+    @Test
+    public void canCheckIfItemIsReferencedAsTarget() {
+        // Create an owner
+        User owner = new User("restrictuser", "password", "restrict@example.com");
+        owner = userRepositoryPort.save(owner);
+
+        // Create a theme manifest
+        ThemeManifest themeManifest = new ThemeManifest();
+        themeManifest.setName("theme");
+        themeManifest.setVersion("1.0");
+        themeManifest.setDescription("description");
+        themeManifest.setAuthor("author");
+        themeManifest.setCreatedAt("createdAt");
+        // Create a theme schema and ui schema
+        Map<String, JsonNode> themeSchemas = new HashMap<>();
+        Map<String, JsonNode> uiSchemas = new HashMap<>();
+        // Create a theme
+        Theme theme = new Theme(owner, "thumbnail_url", "location_url", true, themeManifest, themeSchemas, uiSchemas);
+        theme = themeRepositoryPort.save(theme);
+
+        // Create a menu
+        Menu menu = new Menu("test menu", owner, theme);
+        menu = menuRepositoryPort.save(menu);
+
+        MenuContentItem src = menuContentRepository.save(dummyItem(menu, owner, theme));
+        MenuContentItem tgt = menuContentRepository.save(dummyItem(menu, owner, theme));
+        MenuContentItem notReferenced = menuContentRepository.save(dummyItem(menu, owner, theme));
+        
+        // Create relation: src -> tgt
+        menuContentRepository.save(newRel(src, "category", tgt, null));
+        
+        // Verify we can check if items are referenced as targets
+        assertThat(menuContentRepository.existsByTargetItemId(tgt.getId())).isTrue();
+        assertThat(menuContentRepository.existsByTargetItemId(notReferenced.getId())).isFalse();
+        assertThat(menuContentRepository.findByTargetItemId(tgt.getId())).hasSize(1);
+        assertThat(menuContentRepository.findByTargetItemId(notReferenced.getId())).isEmpty();
     }
 
     private MenuContentItem dummyItem(Menu menu, User owner, Theme theme) {

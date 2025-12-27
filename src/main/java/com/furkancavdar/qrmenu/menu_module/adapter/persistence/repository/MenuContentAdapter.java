@@ -96,4 +96,16 @@ public class MenuContentAdapter implements MenuContentRepositoryPort {
                 .map(MenuContentEntityMapper::toMenuContentRelation)
                 .toList();
     }
+
+    @Override
+    public List<MenuContentRelation> findByTargetItemId(UUID targetItemId) {
+        return jpaMenuContentRelationRepository.findByTargetItem_Id(targetItemId).stream()
+                .map(MenuContentEntityMapper::toMenuContentRelation)
+                .toList();
+    }
+
+    @Override
+    public boolean existsByTargetItemId(UUID targetItemId) {
+        return jpaMenuContentRelationRepository.existsByTargetItem_Id(targetItemId);
+    }
 }

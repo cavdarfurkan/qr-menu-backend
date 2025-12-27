@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1766868456683-1
+      author: Furkan Cavdar
+      comment: Change target_item_id foreign key from CASCADE to RESTRICT to prevent orphaning source items
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: menu_content_relation
+            constraintName: FK_MENU_CONTENT_RELATION_ON_TARGET_ITEM
+        - addForeignKeyConstraint:
+            baseColumnNames: target_item_id
+            baseTableName: menu_content_relation
+            constraintName: FK_MENU_CONTENT_RELATION_ON_TARGET_ITEM
+            referencedColumnNames: id
+            referencedTableName: menu_content_item
+            onDelete: RESTRICT

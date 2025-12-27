@@ -17,4 +17,8 @@ public interface JpaMenuContentRelationRepository extends JpaRepository<MenuCont
     List<MenuContentRelationEntity> findBySourceItem_Id(UUID sourceItemId);
 
     List<MenuContentRelationEntity> findBySourceItem_IdAndFieldNameOrderByPositionAsc(UUID sourceItemId, String fieldName);
+
+    List<MenuContentRelationEntity> findByTargetItem_Id(UUID targetItemId);
+
+    boolean existsByTargetItem_Id(UUID targetItemId);
 }
