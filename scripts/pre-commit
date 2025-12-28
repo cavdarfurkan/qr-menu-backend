@@ -1,0 +1,26 @@
+#!/bin/sh
+#
+# Pre-commit hook that runs Google Java Format check via Spotless.
+# Install this hook by running: ./gradlew installGitHooks
+#
+
+echo "Running code format check..."
+
+# Run spotless check
+./gradlew spotlessCheck --no-daemon -q
+
+RESULT=$?
+
+if [ $RESULT -ne 0 ]; then
+    echo ""
+    echo "❌ Code formatting check failed!"
+    echo ""
+    echo "Please run './gradlew spotlessApply' to fix formatting issues,"
+    echo "then stage the changes and commit again."
+    echo ""
+    exit 1
+fi
+
+echo "✅ Code formatting check passed!"
+exit 0
+

@@ -25,6 +25,9 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Check code formatting
+        run: ./gradlew spotlessCheck --no-daemon
+
       - name: Run tests
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
