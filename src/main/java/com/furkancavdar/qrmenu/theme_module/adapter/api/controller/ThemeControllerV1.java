@@ -6,13 +6,14 @@ import com.furkancavdar.qrmenu.common.ApiResponse;
 import com.furkancavdar.qrmenu.common.exception.ResourceNotFoundException;
 import com.furkancavdar.qrmenu.theme_module.adapter.api.dto.mapper.RegisterThemeRequestMapper;
 import com.furkancavdar.qrmenu.theme_module.adapter.api.dto.mapper.ThemeManifestResponseMapper;
+import com.furkancavdar.qrmenu.theme_module.adapter.api.dto.mapper.ThemeResponseMapper;
 import com.furkancavdar.qrmenu.theme_module.adapter.api.dto.mapper.ThemeSchemasResponseMapper;
 import com.furkancavdar.qrmenu.theme_module.adapter.api.dto.payload.request.RegisterThemeRequestDto;
 import com.furkancavdar.qrmenu.theme_module.adapter.api.dto.payload.request.UnregisterThemeRequestDto;
 import com.furkancavdar.qrmenu.theme_module.adapter.api.dto.payload.response.ThemeManifestResponseDto;
+import com.furkancavdar.qrmenu.theme_module.adapter.api.dto.payload.response.ThemeResponseDto;
 import com.furkancavdar.qrmenu.theme_module.adapter.api.dto.payload.response.ThemeSchemasResponseDto;
 import com.furkancavdar.qrmenu.theme_module.application.port.in.ThemeRegisterUseCase;
-import com.furkancavdar.qrmenu.theme_module.application.port.in.dto.ThemeDto;
 import com.furkancavdar.qrmenu.theme_module.application.port.in.dto.ThemeManifestResultDto;
 import com.furkancavdar.qrmenu.theme_module.application.port.in.dto.ThemeSchemasResultDto;
 import jakarta.validation.Valid;
@@ -55,10 +56,11 @@ public class ThemeControllerV1 {
   }
 
   @GetMapping
-  public ResponseEntity<ApiResponse<Page<ThemeDto>>> getAllThemes(
+  public ResponseEntity<ApiResponse<Page<ThemeResponseDto>>> getAllThemes(
       @RequestParam(defaultValue = "0") Integer page,
       @RequestParam(defaultValue = "20") Integer size) {
-    Page<ThemeDto> allThemes = themeRegisterUseCase.getAllThemes(page, size);
+    Page<ThemeResponseDto> allThemes =
+        themeRegisterUseCase.getAllThemes(page, size).map(ThemeResponseMapper::fromThemeDto);
     return ResponseEntity.ok(ApiResponse.success(allThemes));
   }
 
