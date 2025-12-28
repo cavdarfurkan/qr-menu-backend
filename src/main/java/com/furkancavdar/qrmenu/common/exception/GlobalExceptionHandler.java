@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -33,13 +35,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiResponse<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
+    public ApiResponse<Map<String, List<String>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, List<String>> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
+            errors.computeIfAbsent(fieldName, k -> new ArrayList<>()).add(errorMessage);
         });
+        log.error("Validation failed with {} field(s) having errors: {}", errors.size(), errors);
         return ApiResponse.error("Validation failed", errors);
     }
 
@@ -54,8 +57,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HandlerMethodValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiResponse<Map<String, String>> handleHandlerMethodValidationException(HandlerMethodValidationException ex) {
-        Map<String, String> errors = new HashMap<>();
+    public ApiResponse<Map<String, List<String>>> handleHandlerMethodValidationException(HandlerMethodValidationException ex) {
+        Map<String, List<String>> errors = new HashMap<>();
 
         // Handle parameter validation errors (e.g., @RequestBody, @PathVariable, @RequestParam)
         ex.getParameterValidationResults().forEach(parameterResult -> {
@@ -65,11 +68,11 @@ public class GlobalExceptionHandler {
                         ? ((FieldError) error).getField()
                         : (parameterName != null ? parameterName : "unknown");
                 String errorMessage = error.getDefaultMessage();
-                errors.put(fieldName, errorMessage);
+                errors.computeIfAbsent(fieldName, k -> new ArrayList<>()).add(errorMessage);
             });
         });
 
-        log.error("Validation failed: {}", errors);
+        log.error("Validation failed with {} field(s) having errors: {}", errors.size(), errors);
         return ApiResponse.error("Validation failed", errors);
     }
 

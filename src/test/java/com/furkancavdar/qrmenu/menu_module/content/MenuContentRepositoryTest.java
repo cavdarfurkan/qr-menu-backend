@@ -56,14 +56,20 @@ public class MenuContentRepositoryTest {
     @Autowired
     ObjectMapper mapper;
 
-    private JsonNode obj(String json) throws Exception {
-        return mapper.readTree(json);
-    }
+    /**
+     * Record to hold test fixture data for owner, theme, and menu.
+     */
+    private record TestFixture(User owner, Theme theme, Menu menu) {}
 
-    @Test
-    public void saveAndReadRelationsInOrder() throws Exception {
+    /**
+     * Creates and saves a complete test fixture with owner, theme, and menu.
+     * @param username unique username for the owner
+     * @param email unique email for the owner
+     * @return TestFixture containing the saved owner, theme, and menu
+     */
+    private TestFixture createTestFixture(String username, String email) {
         // Create an owner
-        User owner = new User("username", "password", "email");
+        User owner = new User(username, "password", email);
         owner = userRepositoryPort.save(owner);
 
         // Create a theme manifest
@@ -86,11 +92,22 @@ public class MenuContentRepositoryTest {
         Menu menu = new Menu("test menu", owner, theme);
         menu = menuRepositoryPort.save(menu);
 
+        return new TestFixture(owner, theme, menu);
+    }
+
+    private JsonNode obj(String json) throws Exception {
+        return mapper.readTree(json);
+    }
+
+    @Test
+    public void saveAndReadRelationsInOrder() throws Exception {
+        TestFixture fixture = createTestFixture("username", "email");
+
         // Create a category
         MenuContentItem category = MenuContentItem.builder()
-                .menu(menu)
-                .ownerId(owner.getId())
-                .theme(theme)
+                .menu(fixture.menu())
+                .ownerId(fixture.owner().getId())
+                .theme(fixture.theme())
                 .collectionName("category")
                 .data(obj("{\"name\":\"Coffee\",\"slug\":\"coffee\"}"))
                 .build();
@@ -98,9 +115,9 @@ public class MenuContentRepositoryTest {
 
         // Create a products
         MenuContentItem product = MenuContentItem.builder()
-                .menu(menu)
-                .ownerId(owner.getId())
-                .theme(theme)
+                .menu(fixture.menu())
+                .ownerId(fixture.owner().getId())
+                .theme(fixture.theme())
                 .collectionName("product")
                 .data(obj("{\"name\":\"Espresso\",\"price\":45}"))
                 .build();
@@ -108,16 +125,16 @@ public class MenuContentRepositoryTest {
 
         // Two relations
         MenuContentItem upsell1 = MenuContentItem.builder()
-                .menu(menu)
-                .ownerId(owner.getId())
-                .theme(theme)
+                .menu(fixture.menu())
+                .ownerId(fixture.owner().getId())
+                .theme(fixture.theme())
                 .collectionName("product")
                 .data(obj("{\"name\":\"Double Espresso\",\"price\":45}"))
                 .build();
         MenuContentItem upsell2 = MenuContentItem.builder()
-                .menu(menu)
-                .ownerId(owner.getId())
-                .theme(theme)
+                .menu(fixture.menu())
+                .ownerId(fixture.owner().getId())
+                .theme(fixture.theme())
                 .collectionName("product")
                 .data(obj("{\"name\":\"Cappuccino\",\"price\":40}"))
                 .build();
@@ -137,33 +154,11 @@ public class MenuContentRepositoryTest {
 
     @Test
     public void uniquePositionWithinList_enforced() {
-        // Create an owner
-        User owner = new User("username", "password", "email");
-        owner = userRepositoryPort.save(owner);
+        TestFixture fixture = createTestFixture("username2", "email2");
 
-        // Create a theme manifest
-        ThemeManifest themeManifest = new ThemeManifest();
-        themeManifest.setName("theme");
-        themeManifest.setVersion("1.0");
-        themeManifest.setDescription("description");
-        themeManifest.setAuthor("author");
-        themeManifest.setCreatedAt("createdAt");
-
-        // Create a theme schema and ui schema
-        Map<String, JsonNode> themeSchemas = new HashMap<>();
-        Map<String, JsonNode> uiSchemas = new HashMap<>();
-
-        // Create a theme
-        Theme theme = new Theme(owner, "thumbnail_url", "location_url", true, themeManifest, themeSchemas, uiSchemas);
-        theme = themeRepositoryPort.save(theme);
-
-        // Create a menu
-        Menu menu = new Menu("test menu", owner, theme);
-        menu = menuRepositoryPort.save(menu);
-
-        MenuContentItem src = menuContentRepository.save(dummyItem(menu, owner, theme));
-        MenuContentItem t1 = menuContentRepository.save(dummyItem(menu, owner, theme));
-        MenuContentItem t2 = menuContentRepository.save(dummyItem(menu, owner, theme));
+        MenuContentItem src = menuContentRepository.save(dummyItem(fixture.menu(), fixture.owner(), fixture.theme()));
+        MenuContentItem t1 = menuContentRepository.save(dummyItem(fixture.menu(), fixture.owner(), fixture.theme()));
+        MenuContentItem t2 = menuContentRepository.save(dummyItem(fixture.menu(), fixture.owner(), fixture.theme()));
 
         menuContentRepository.save(newRel(src, "addons", t1, 0));
         // The second save with duplicate position should fail
@@ -175,30 +170,10 @@ public class MenuContentRepositoryTest {
 
     @Test
     public void cascadeDelete_removesRelationsWhenSourceDeleted() {
-        // Create an owner
-        User owner = new User("username", "password", "email");
-        owner = userRepositoryPort.save(owner);
+        TestFixture fixture = createTestFixture("username3", "email3");
 
-        // Create a theme manifest
-        ThemeManifest themeManifest = new ThemeManifest();
-        themeManifest.setName("theme");
-        themeManifest.setVersion("1.0");
-        themeManifest.setDescription("description");
-        themeManifest.setAuthor("author");
-        themeManifest.setCreatedAt("createdAt");
-        // Create a theme schema and ui schema
-        Map<String, JsonNode> themeSchemas = new HashMap<>();
-        Map<String, JsonNode> uiSchemas = new HashMap<>();
-        // Create a theme
-        Theme theme = new Theme(owner, "thumbnail_url", "location_url", true, themeManifest, themeSchemas, uiSchemas);
-        theme = themeRepositoryPort.save(theme);
-
-        // Create a menu
-        Menu menu = new Menu("test menu", owner, theme);
-        menu = menuRepositoryPort.save(menu);
-
-        MenuContentItem src = menuContentRepository.save(dummyItem(menu, owner, theme));
-        MenuContentItem tgt = menuContentRepository.save(dummyItem(menu, owner, theme));
+        MenuContentItem src = menuContentRepository.save(dummyItem(fixture.menu(), fixture.owner(), fixture.theme()));
+        MenuContentItem tgt = menuContentRepository.save(dummyItem(fixture.menu(), fixture.owner(), fixture.theme()));
         menuContentRepository.save(newRel(src, "category", tgt, null));
         assertThat(menuContentRepository.findBySourceItemId(src.getId())).hasSize(1);
 
@@ -211,31 +186,11 @@ public class MenuContentRepositoryTest {
 
     @Test
     public void canCheckIfItemIsReferencedAsTarget() {
-        // Create an owner
-        User owner = new User("restrictuser", "password", "restrict@example.com");
-        owner = userRepositoryPort.save(owner);
+        TestFixture fixture = createTestFixture("restrictuser", "restrict@example.com");
 
-        // Create a theme manifest
-        ThemeManifest themeManifest = new ThemeManifest();
-        themeManifest.setName("theme");
-        themeManifest.setVersion("1.0");
-        themeManifest.setDescription("description");
-        themeManifest.setAuthor("author");
-        themeManifest.setCreatedAt("createdAt");
-        // Create a theme schema and ui schema
-        Map<String, JsonNode> themeSchemas = new HashMap<>();
-        Map<String, JsonNode> uiSchemas = new HashMap<>();
-        // Create a theme
-        Theme theme = new Theme(owner, "thumbnail_url", "location_url", true, themeManifest, themeSchemas, uiSchemas);
-        theme = themeRepositoryPort.save(theme);
-
-        // Create a menu
-        Menu menu = new Menu("test menu", owner, theme);
-        menu = menuRepositoryPort.save(menu);
-
-        MenuContentItem src = menuContentRepository.save(dummyItem(menu, owner, theme));
-        MenuContentItem tgt = menuContentRepository.save(dummyItem(menu, owner, theme));
-        MenuContentItem notReferenced = menuContentRepository.save(dummyItem(menu, owner, theme));
+        MenuContentItem src = menuContentRepository.save(dummyItem(fixture.menu(), fixture.owner(), fixture.theme()));
+        MenuContentItem tgt = menuContentRepository.save(dummyItem(fixture.menu(), fixture.owner(), fixture.theme()));
+        MenuContentItem notReferenced = menuContentRepository.save(dummyItem(fixture.menu(), fixture.owner(), fixture.theme()));
         
         // Create relation: src -> tgt
         menuContentRepository.save(newRel(src, "category", tgt, null));

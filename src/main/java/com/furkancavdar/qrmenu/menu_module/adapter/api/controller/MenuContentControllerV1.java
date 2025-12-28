@@ -11,11 +11,13 @@ import com.furkancavdar.qrmenu.menu_module.application.port.in.dto.HydratedItemD
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +27,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/menu/{menuId}/content")
 @RequiredArgsConstructor
+@Validated
 public class MenuContentControllerV1 {
 
     private final MenuContentUseCase menuContentUseCase;
@@ -55,7 +58,7 @@ public class MenuContentControllerV1 {
             @Valid @PathVariable @NotNull Long menuId,
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @PathVariable @NotBlank String collection,
-            @Valid @PathVariable @NotBlank String itemId,
+            @Valid @PathVariable @NotBlank @Pattern(regexp = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$") String itemId,
             @Valid @RequestBody UpdateMenuContentRequestDto updateMenuContentRequestDto
     ) {
         HydratedItemDto updatedContent = menuContentUseCase.updateContent(
@@ -90,7 +93,7 @@ public class MenuContentControllerV1 {
             @Valid @PathVariable @NotNull Long menuId,
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @PathVariable @NotBlank String collection,
-            @Valid @PathVariable @NotBlank String itemId
+            @Valid @PathVariable @NotBlank @Pattern(regexp = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$") String itemId
     ) {
         HydratedItemDto content = menuContentUseCase.getContent(userDetails.getUsername(), menuId, collection, UUID.fromString(itemId));
         return ResponseEntity.ok(ApiResponse.success(
@@ -103,7 +106,7 @@ public class MenuContentControllerV1 {
             @Valid @PathVariable @NotNull Long menuId,
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @PathVariable @NotBlank String collection,
-            @Valid @PathVariable @NotBlank String itemId
+            @Valid @PathVariable @NotBlank @Pattern(regexp = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$") String itemId
     ) {
         menuContentUseCase.deleteContent(userDetails.getUsername(), menuId, collection, UUID.fromString(itemId));
         log.info("MenuContentControllerV1:deleteContent menu content deleted successfully");

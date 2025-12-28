@@ -42,6 +42,15 @@ public class MenuContentAdapter implements MenuContentRepositoryPort {
     }
 
     @Override
+    public void deleteAll(List<MenuContentItem> menuContentItems) {
+        List<com.furkancavdar.qrmenu.menu_module.adapter.persistence.entity.MenuContentItemEntity> entities = 
+                menuContentItems.stream()
+                        .map(MenuContentEntityMapper::toMenuContentItemEntity)
+                        .toList();
+        jpaMenuContentItemRepository.deleteAll(entities);
+    }
+
+    @Override
     public Optional<MenuContentItem> findById(UUID itemId) {
         return jpaMenuContentItemRepository.findById(itemId).map(MenuContentEntityMapper::toMenuContentItem);
     }
@@ -107,5 +116,10 @@ public class MenuContentAdapter implements MenuContentRepositoryPort {
     @Override
     public boolean existsByTargetItemId(UUID targetItemId) {
         return jpaMenuContentRelationRepository.existsByTargetItem_Id(targetItemId);
+    }
+
+    @Override
+    public Set<UUID> findReferencedTargetItemIds(Set<UUID> targetItemIds) {
+        return jpaMenuContentRelationRepository.findReferencedTargetItemIds(targetItemIds);
     }
 }

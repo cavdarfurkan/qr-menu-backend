@@ -96,15 +96,6 @@ public class MenuContentControllerTest {
                 .andExpect(jsonPath("$.data.collection_name", is("product")))
                 .andExpect(jsonPath("$.data.resolved.category[0].slug", is("coffee")))
                 .andReturn();
-
-//        var id = mapper.readTree(res.getResponse().getContentAsByteArray()).get("data").get("id").asText();
-//        mvc.perform(get("/api/v1/menu/{menuId}/content/{collection}/{itemId}", menu.getId(), "product", id)
-//                        .header("Authorization", "Bearer " + accessToken))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.success", is(true)))
-//                .andExpect(jsonPath("$.message", is("Success")))
-//                .andExpect(jsonPath("$.data.name", is("Espresso")))
-//                .andExpect(jsonPath("$.data.price", is(45)));
     }
 
     @Test
@@ -655,6 +646,29 @@ public class MenuContentControllerTest {
                         .content(mapper.writeValueAsBytes(deleteBody))
                         .header("Authorization", "Bearer " + accessToken))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void delete_content_bulk_should_reject_more_than_100_items() throws Exception {
+        setup();
+
+        // Create a list with 101 UUIDs (exceeds the limit of 100)
+        List<String> tooManyIds = new java.util.ArrayList<>();
+        for (int i = 0; i < 101; i++) {
+            tooManyIds.add(java.util.UUID.randomUUID().toString());
+        }
+
+        var deleteBody = Map.of(
+                "item_ids", tooManyIds
+        );
+
+        // Should return 400 Bad Request due to size constraint violation
+        mvc.perform(delete("/api/v1/menu/{menuId}/content/{collection}", menu.getId(), "product")
+                        .contentType(MediaType.APPLICATION_JSON.toString())
+                        .content(mapper.writeValueAsBytes(deleteBody))
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success", is(false)));
     }
 
     @DynamicPropertySource

@@ -11,12 +11,6 @@ jobs:
     name: Run Tests
     runs-on: ubuntu-latest
 
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_REGION: ${{ secrets.AWS_REGION }}
-      JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -32,11 +26,19 @@ jobs:
         run: chmod +x gradlew
 
       - name: Run tests
-        run: ./gradlew test --no-daemon
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+        timeout-minutes: 30
+        run: |
+          set +x
+          ./gradlew test --no-daemon
 
       - name: Publish test report
         uses: mikepenz/action-junit-report@v4
-        if: success() || failure()
+        if: always()
         with:
           report_paths: "**/build/test-results/test/TEST-*.xml"
           check_name: Test Results

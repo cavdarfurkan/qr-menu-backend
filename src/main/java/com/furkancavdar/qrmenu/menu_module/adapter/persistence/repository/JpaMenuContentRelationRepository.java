@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public interface JpaMenuContentRelationRepository extends JpaRepository<MenuContentRelationEntity, Long> {
@@ -21,4 +22,7 @@ public interface JpaMenuContentRelationRepository extends JpaRepository<MenuCont
     List<MenuContentRelationEntity> findByTargetItem_Id(UUID targetItemId);
 
     boolean existsByTargetItem_Id(UUID targetItemId);
+
+    @Query("SELECT DISTINCT r.targetItem.id FROM MenuContentRelationEntity r WHERE r.targetItem.id IN :targetItemIds")
+    Set<UUID> findReferencedTargetItemIds(Set<UUID> targetItemIds);
 }

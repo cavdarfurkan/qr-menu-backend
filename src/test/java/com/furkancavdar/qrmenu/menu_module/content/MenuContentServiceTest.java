@@ -68,6 +68,52 @@ public class MenuContentServiceTest {
         }
     }
 
+    private User createTestUser(String username, String email) {
+        User user = new User(username, "password", email);
+        return userRepositoryPort.save(user);
+    }
+
+    private ThemeManifest createDefaultThemeManifest() {
+        ThemeManifest themeManifest = new ThemeManifest();
+        themeManifest.setName("theme");
+        themeManifest.setVersion("1.0");
+        themeManifest.setDescription("description");
+        themeManifest.setAuthor("author");
+        themeManifest.setCreatedAt("createdAt");
+        return themeManifest;
+    }
+
+    private Map<String, JsonNode> createThemeSchemas(String... collections) {
+        Map<String, JsonNode> themeSchemas = new HashMap<>();
+        for (String collection : collections) {
+            if ("product".equals(collection)) {
+                themeSchemas.put(
+                        "product",
+                        obj("{\"$ref\":\"#/definitions/product\",\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"definitions\":{\"product\":{\"type\":\"object\",\"required\":[\"name\",\"price\"],\"properties\":{\"name\":{\"type\":\"string\"},\"price\":{\"type\":\"number\"}},\"additionalProperties\":false}}}")
+                );
+            } else if ("category".equals(collection)) {
+                themeSchemas.put(
+                        "category",
+                        obj("{\"$ref\":\"#/definitions/category\",\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"definitions\":{\"category\":{\"type\":\"object\",\"required\":[\"name\",\"slug\"],\"properties\":{\"name\":{\"type\":\"string\"},\"slug\":{\"type\":\"string\"}},\"additionalProperties\":false}}}")
+                );
+            }
+        }
+        return themeSchemas;
+    }
+
+    private Theme createThemeWithSchemas(User owner, String... collections) {
+        ThemeManifest manifest = createDefaultThemeManifest();
+        Map<String, JsonNode> schemas = createThemeSchemas(collections);
+        Map<String, JsonNode> uiSchemas = new HashMap<>();
+        Theme theme = new Theme(owner, "thumbnail_url", "location_url", true, manifest, schemas, uiSchemas);
+        return themeRepositoryPort.save(theme);
+    }
+
+    private Menu createTestMenu(String name, User owner, Theme theme) {
+        Menu menu = new Menu(name, owner, theme);
+        return menuRepositoryPort.save(menu);
+    }
+
     @Test
     public void create_update_hydrate_flow() {
         // Create an owner
@@ -154,30 +200,9 @@ public class MenuContentServiceTest {
 
     @Test
     public void delete_content_should_remove_item_and_relations() {
-        // Create an owner
-        User owner = new User("deleteuser", "password", "delete@example.com");
-        owner = userRepositoryPort.save(owner);
-
-        // Create a theme
-        ThemeManifest themeManifest = new ThemeManifest();
-        themeManifest.setName("theme");
-        themeManifest.setVersion("1.0");
-        themeManifest.setDescription("description");
-        themeManifest.setAuthor("author");
-        themeManifest.setCreatedAt("createdAt");
-
-        Map<String, JsonNode> themeSchemas = new HashMap<>();
-        themeSchemas.put(
-                "product",
-                obj("{\"$ref\":\"#/definitions/product\",\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"definitions\":{\"product\":{\"type\":\"object\",\"required\":[\"name\",\"price\"],\"properties\":{\"name\":{\"type\":\"string\"},\"price\":{\"type\":\"number\"}},\"additionalProperties\":false}}}")
-        );
-        Map<String, JsonNode> uiSchemas = new HashMap<>();
-
-        Theme theme = new Theme(owner, "thumbnail_url", "location_url", true, themeManifest, themeSchemas, uiSchemas);
-        theme = themeRepositoryPort.save(theme);
-
-        Menu menu = new Menu("test menu", owner, theme);
-        menu = menuRepositoryPort.save(menu);
+        User owner = createTestUser("deleteuser", "delete@example.com");
+        Theme theme = createThemeWithSchemas(owner, "product");
+        Menu menu = createTestMenu("test menu", owner, theme);
 
         // Create a category
         MenuContentItem category = MenuContentItem.builder()
@@ -212,30 +237,9 @@ public class MenuContentServiceTest {
 
     @Test
     public void delete_content_bulk_should_remove_multiple_items() {
-        // Create an owner
-        User owner = new User("bulkuser", "password", "bulk@example.com");
-        owner = userRepositoryPort.save(owner);
-
-        // Create a theme
-        ThemeManifest themeManifest = new ThemeManifest();
-        themeManifest.setName("theme");
-        themeManifest.setVersion("1.0");
-        themeManifest.setDescription("description");
-        themeManifest.setAuthor("author");
-        themeManifest.setCreatedAt("createdAt");
-
-        Map<String, JsonNode> themeSchemas = new HashMap<>();
-        themeSchemas.put(
-                "product",
-                obj("{\"$ref\":\"#/definitions/product\",\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"definitions\":{\"product\":{\"type\":\"object\",\"required\":[\"name\",\"price\"],\"properties\":{\"name\":{\"type\":\"string\"},\"price\":{\"type\":\"number\"}},\"additionalProperties\":false}}}")
-        );
-        Map<String, JsonNode> uiSchemas = new HashMap<>();
-
-        Theme theme = new Theme(owner, "thumbnail_url", "location_url", true, themeManifest, themeSchemas, uiSchemas);
-        theme = themeRepositoryPort.save(theme);
-
-        Menu menu = new Menu("test menu", owner, theme);
-        menu = menuRepositoryPort.save(menu);
+        User owner = createTestUser("bulkuser", "bulk@example.com");
+        Theme theme = createThemeWithSchemas(owner, "product");
+        Menu menu = createTestMenu("test menu", owner, theme);
 
         // Create multiple products
         HydratedItemDto product1 = menuContentUseCase.createContent(
@@ -284,30 +288,9 @@ public class MenuContentServiceTest {
 
     @Test
     public void delete_content_bulk_with_relations_should_cascade() {
-        // Create an owner
-        User owner = new User("cascadeuser", "password", "cascade@example.com");
-        owner = userRepositoryPort.save(owner);
-
-        // Create a theme
-        ThemeManifest themeManifest = new ThemeManifest();
-        themeManifest.setName("theme");
-        themeManifest.setVersion("1.0");
-        themeManifest.setDescription("description");
-        themeManifest.setAuthor("author");
-        themeManifest.setCreatedAt("createdAt");
-
-        Map<String, JsonNode> themeSchemas = new HashMap<>();
-        themeSchemas.put(
-                "product",
-                obj("{\"$ref\":\"#/definitions/product\",\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"definitions\":{\"product\":{\"type\":\"object\",\"required\":[\"name\",\"price\"],\"properties\":{\"name\":{\"type\":\"string\"},\"price\":{\"type\":\"number\"}},\"additionalProperties\":false}}}")
-        );
-        Map<String, JsonNode> uiSchemas = new HashMap<>();
-
-        Theme theme = new Theme(owner, "thumbnail_url", "location_url", true, themeManifest, themeSchemas, uiSchemas);
-        theme = themeRepositoryPort.save(theme);
-
-        Menu menu = new Menu("test menu", owner, theme);
-        menu = menuRepositoryPort.save(menu);
+        User owner = createTestUser("cascadeuser", "cascade@example.com");
+        Theme theme = createThemeWithSchemas(owner, "product");
+        Menu menu = createTestMenu("test menu", owner, theme);
 
         // Create categories
         MenuContentItem category1 = MenuContentItem.builder()
@@ -370,68 +353,25 @@ public class MenuContentServiceTest {
 
     @Test
     public void delete_content_should_throw_exception_for_non_existent_item() {
-        // Create an owner
-        User owner = new User("erroruser1", "password", "error1@example.com");
-        owner = userRepositoryPort.save(owner);
-
-        // Create a theme
-        ThemeManifest themeManifest = new ThemeManifest();
-        themeManifest.setName("theme");
-        themeManifest.setVersion("1.0");
-        themeManifest.setDescription("description");
-        themeManifest.setAuthor("author");
-        themeManifest.setCreatedAt("createdAt");
-
-        Map<String, JsonNode> themeSchemas = new HashMap<>();
-        themeSchemas.put(
-                "product",
-                obj("{\"$ref\":\"#/definitions/product\",\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"definitions\":{\"product\":{\"type\":\"object\",\"required\":[\"name\",\"price\"],\"properties\":{\"name\":{\"type\":\"string\"},\"price\":{\"type\":\"number\"}},\"additionalProperties\":false}}}")
-        );
-        Map<String, JsonNode> uiSchemas = new HashMap<>();
-
-        Theme theme = new Theme(owner, "thumbnail_url", "location_url", true, themeManifest, themeSchemas, uiSchemas);
-        theme = themeRepositoryPort.save(theme);
-
-        Menu menu = new Menu("test menu", owner, theme);
-        menu = menuRepositoryPort.save(menu);
+        User owner = createTestUser("erroruser1", "error1@example.com");
+        Theme theme = createThemeWithSchemas(owner, "product");
+        Menu menu = createTestMenu("test menu", owner, theme);
 
         // Try to delete non-existent item
         final UUID nonExistentId = UUID.randomUUID();
         final User finalOwner = owner;
         final Menu finalMenu = menu;
         
-        assertThat(org.junit.jupiter.api.Assertions.assertThrows(
-                com.furkancavdar.qrmenu.common.exception.ResourceNotFoundException.class,
-                () -> menuContentUseCase.deleteContent(finalOwner.getUsername(), finalMenu.getId(), "product", nonExistentId)
-        ).getMessage()).contains("not found");
+        assertThatThrownBy(() -> menuContentUseCase.deleteContent(finalOwner.getUsername(), finalMenu.getId(), "product", nonExistentId))
+                .isInstanceOf(com.furkancavdar.qrmenu.common.exception.ResourceNotFoundException.class)
+                .hasMessageContaining("not found");
     }
 
     @Test
     public void delete_content_should_throw_exception_for_wrong_collection() {
-        // Create an owner
-        User owner = new User("erroruser2", "password", "error2@example.com");
-        owner = userRepositoryPort.save(owner);
-
-        // Create a theme
-        ThemeManifest themeManifest = new ThemeManifest();
-        themeManifest.setName("theme");
-        themeManifest.setVersion("1.0");
-        themeManifest.setDescription("description");
-        themeManifest.setAuthor("author");
-        themeManifest.setCreatedAt("createdAt");
-
-        Map<String, JsonNode> themeSchemas = new HashMap<>();
-        themeSchemas.put(
-                "product",
-                obj("{\"$ref\":\"#/definitions/product\",\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"definitions\":{\"product\":{\"type\":\"object\",\"required\":[\"name\",\"price\"],\"properties\":{\"name\":{\"type\":\"string\"},\"price\":{\"type\":\"number\"}},\"additionalProperties\":false}}}")
-        );
-        Map<String, JsonNode> uiSchemas = new HashMap<>();
-
-        Theme theme = new Theme(owner, "thumbnail_url", "location_url", true, themeManifest, themeSchemas, uiSchemas);
-        theme = themeRepositoryPort.save(theme);
-
-        Menu menu = new Menu("test menu", owner, theme);
-        menu = menuRepositoryPort.save(menu);
+        User owner = createTestUser("erroruser2", "error2@example.com");
+        Theme theme = createThemeWithSchemas(owner, "product");
+        Menu menu = createTestMenu("test menu", owner, theme);
 
         // Create a product
         HydratedItemDto product = menuContentUseCase.createContent(
@@ -445,38 +385,16 @@ public class MenuContentServiceTest {
         // Try to delete with wrong collection name
         final User finalOwner = owner;
         final Menu finalMenu = menu;
-        assertThat(org.junit.jupiter.api.Assertions.assertThrows(
-                com.furkancavdar.qrmenu.common.exception.ResourceNotFoundException.class,
-                () -> menuContentUseCase.deleteContent(finalOwner.getUsername(), finalMenu.getId(), "category", product.getId())
-        ).getMessage()).contains("not found");
+        assertThatThrownBy(() -> menuContentUseCase.deleteContent(finalOwner.getUsername(), finalMenu.getId(), "category", product.getId()))
+                .isInstanceOf(com.furkancavdar.qrmenu.common.exception.ResourceNotFoundException.class)
+                .hasMessageContaining("not found");
     }
 
     @Test
     public void delete_content_bulk_should_handle_empty_list() {
-        // Create an owner
-        User owner = new User("emptyuser", "password", "empty@example.com");
-        owner = userRepositoryPort.save(owner);
-
-        // Create a theme
-        ThemeManifest themeManifest = new ThemeManifest();
-        themeManifest.setName("theme");
-        themeManifest.setVersion("1.0");
-        themeManifest.setDescription("description");
-        themeManifest.setAuthor("author");
-        themeManifest.setCreatedAt("createdAt");
-
-        Map<String, JsonNode> themeSchemas = new HashMap<>();
-        themeSchemas.put(
-                "product",
-                obj("{\"$ref\":\"#/definitions/product\",\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"definitions\":{\"product\":{\"type\":\"object\",\"required\":[\"name\",\"price\"],\"properties\":{\"name\":{\"type\":\"string\"},\"price\":{\"type\":\"number\"}},\"additionalProperties\":false}}}")
-        );
-        Map<String, JsonNode> uiSchemas = new HashMap<>();
-
-        Theme theme = new Theme(owner, "thumbnail_url", "location_url", true, themeManifest, themeSchemas, uiSchemas);
-        theme = themeRepositoryPort.save(theme);
-
-        Menu menu = new Menu("test menu", owner, theme);
-        menu = menuRepositoryPort.save(menu);
+        User owner = createTestUser("emptyuser", "empty@example.com");
+        Theme theme = createThemeWithSchemas(owner, "product");
+        Menu menu = createTestMenu("test menu", owner, theme);
 
         // Should not throw exception for empty list
         menuContentUseCase.deleteContentBulk(owner.getUsername(), menu.getId(), "product", List.of());
@@ -487,30 +405,9 @@ public class MenuContentServiceTest {
 
     @Test
     public void delete_content_bulk_should_throw_exception_for_non_existent_items() {
-        // Create an owner
-        User owner = new User("bulkerror1", "password", "bulkerror1@example.com");
-        owner = userRepositoryPort.save(owner);
-
-        // Create a theme
-        ThemeManifest themeManifest = new ThemeManifest();
-        themeManifest.setName("theme");
-        themeManifest.setVersion("1.0");
-        themeManifest.setDescription("description");
-        themeManifest.setAuthor("author");
-        themeManifest.setCreatedAt("createdAt");
-
-        Map<String, JsonNode> themeSchemas = new HashMap<>();
-        themeSchemas.put(
-                "product",
-                obj("{\"$ref\":\"#/definitions/product\",\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"definitions\":{\"product\":{\"type\":\"object\",\"required\":[\"name\",\"price\"],\"properties\":{\"name\":{\"type\":\"string\"},\"price\":{\"type\":\"number\"}},\"additionalProperties\":false}}}")
-        );
-        Map<String, JsonNode> uiSchemas = new HashMap<>();
-
-        Theme theme = new Theme(owner, "thumbnail_url", "location_url", true, themeManifest, themeSchemas, uiSchemas);
-        theme = themeRepositoryPort.save(theme);
-
-        Menu menu = new Menu("test menu", owner, theme);
-        menu = menuRepositoryPort.save(menu);
+        User owner = createTestUser("bulkerror1", "bulkerror1@example.com");
+        Theme theme = createThemeWithSchemas(owner, "product");
+        Menu menu = createTestMenu("test menu", owner, theme);
 
         // Create one product
         HydratedItemDto product = menuContentUseCase.createContent(
@@ -526,47 +423,21 @@ public class MenuContentServiceTest {
         final User finalOwner = owner;
         final Menu finalMenu = menu;
         
-        assertThat(org.junit.jupiter.api.Assertions.assertThrows(
-                com.furkancavdar.qrmenu.common.exception.ResourceNotFoundException.class,
-                () -> menuContentUseCase.deleteContentBulk(
-                        finalOwner.getUsername(),
-                        finalMenu.getId(),
-                        "product",
-                        List.of(product.getId(), nonExistentId)
-                )
-        ).getMessage()).contains("One or more items not found");
+        assertThatThrownBy(() -> menuContentUseCase.deleteContentBulk(
+                finalOwner.getUsername(),
+                finalMenu.getId(),
+                "product",
+                List.of(product.getId(), nonExistentId)
+        ))
+                .isInstanceOf(com.furkancavdar.qrmenu.common.exception.ResourceNotFoundException.class)
+                .hasMessageContaining("One or more items not found");
     }
 
     @Test
     public void delete_content_bulk_should_throw_exception_for_wrong_collection() {
-        // Create an owner
-        User owner = new User("bulkerror2", "password", "bulkerror2@example.com");
-        owner = userRepositoryPort.save(owner);
-
-        // Create a theme
-        ThemeManifest themeManifest = new ThemeManifest();
-        themeManifest.setName("theme");
-        themeManifest.setVersion("1.0");
-        themeManifest.setDescription("description");
-        themeManifest.setAuthor("author");
-        themeManifest.setCreatedAt("createdAt");
-
-        Map<String, JsonNode> themeSchemas = new HashMap<>();
-        themeSchemas.put(
-                "product",
-                obj("{\"$ref\":\"#/definitions/product\",\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"definitions\":{\"product\":{\"type\":\"object\",\"required\":[\"name\",\"price\"],\"properties\":{\"name\":{\"type\":\"string\"},\"price\":{\"type\":\"number\"}},\"additionalProperties\":false}}}")
-        );
-        themeSchemas.put(
-                "category",
-                obj("{\"$ref\":\"#/definitions/category\",\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"definitions\":{\"category\":{\"type\":\"object\",\"required\":[\"name\",\"slug\"],\"properties\":{\"name\":{\"type\":\"string\"},\"slug\":{\"type\":\"string\"}},\"additionalProperties\":false}}}")
-        );
-        Map<String, JsonNode> uiSchemas = new HashMap<>();
-
-        Theme theme = new Theme(owner, "thumbnail_url", "location_url", true, themeManifest, themeSchemas, uiSchemas);
-        theme = themeRepositoryPort.save(theme);
-
-        Menu menu = new Menu("test menu", owner, theme);
-        menu = menuRepositoryPort.save(menu);
+        User owner = createTestUser("bulkerror2", "bulkerror2@example.com");
+        Theme theme = createThemeWithSchemas(owner, "product", "category");
+        Menu menu = createTestMenu("test menu", owner, theme);
 
         // Create products
         HydratedItemDto product1 = menuContentUseCase.createContent(
@@ -588,47 +459,21 @@ public class MenuContentServiceTest {
         // Try to delete with wrong collection name
         final User finalOwner = owner;
         final Menu finalMenu = menu;
-        assertThat(org.junit.jupiter.api.Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> menuContentUseCase.deleteContentBulk(
-                        finalOwner.getUsername(),
-                        finalMenu.getId(),
-                        "category",
-                        List.of(product1.getId(), product2.getId())
-                )
-        ).getMessage()).contains("must belong to");
+        assertThatThrownBy(() -> menuContentUseCase.deleteContentBulk(
+                finalOwner.getUsername(),
+                finalMenu.getId(),
+                "category",
+                List.of(product1.getId(), product2.getId())
+        ))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("must belong to");
     }
 
     @Test
     public void delete_content_bulk_should_throw_exception_for_mixed_collections() {
-        // Create an owner
-        User owner = new User("bulkerror3", "password", "bulkerror3@example.com");
-        owner = userRepositoryPort.save(owner);
-
-        // Create a theme
-        ThemeManifest themeManifest = new ThemeManifest();
-        themeManifest.setName("theme");
-        themeManifest.setVersion("1.0");
-        themeManifest.setDescription("description");
-        themeManifest.setAuthor("author");
-        themeManifest.setCreatedAt("createdAt");
-
-        Map<String, JsonNode> themeSchemas = new HashMap<>();
-        themeSchemas.put(
-                "product",
-                obj("{\"$ref\":\"#/definitions/product\",\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"definitions\":{\"product\":{\"type\":\"object\",\"required\":[\"name\",\"price\"],\"properties\":{\"name\":{\"type\":\"string\"},\"price\":{\"type\":\"number\"}},\"additionalProperties\":false}}}")
-        );
-        themeSchemas.put(
-                "category",
-                obj("{\"$ref\":\"#/definitions/category\",\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"definitions\":{\"category\":{\"type\":\"object\",\"required\":[\"name\",\"slug\"],\"properties\":{\"name\":{\"type\":\"string\"},\"slug\":{\"type\":\"string\"}},\"additionalProperties\":false}}}")
-        );
-        Map<String, JsonNode> uiSchemas = new HashMap<>();
-
-        Theme theme = new Theme(owner, "thumbnail_url", "location_url", true, themeManifest, themeSchemas, uiSchemas);
-        theme = themeRepositoryPort.save(theme);
-
-        Menu menu = new Menu("test menu", owner, theme);
-        menu = menuRepositoryPort.save(menu);
+        User owner = createTestUser("bulkerror3", "bulkerror3@example.com");
+        Theme theme = createThemeWithSchemas(owner, "product", "category");
+        Menu menu = createTestMenu("test menu", owner, theme);
 
         // Create a product
         HydratedItemDto product = menuContentUseCase.createContent(
@@ -653,47 +498,21 @@ public class MenuContentServiceTest {
         final User finalOwner = owner;
         final Menu finalMenu = menu;
         final MenuContentItem finalCategory = category;
-        assertThat(org.junit.jupiter.api.Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> menuContentUseCase.deleteContentBulk(
-                        finalOwner.getUsername(),
-                        finalMenu.getId(),
-                        "product",
-                        List.of(product.getId(), finalCategory.getId())
-                )
-        ).getMessage()).contains("must belong to");
+        assertThatThrownBy(() -> menuContentUseCase.deleteContentBulk(
+                finalOwner.getUsername(),
+                finalMenu.getId(),
+                "product",
+                List.of(product.getId(), finalCategory.getId())
+        ))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("must belong to");
     }
 
     @Test
     public void delete_content_should_throw_exception_when_referenced_as_target() {
-        // Create an owner
-        User owner = new User("refuser1", "password", "ref1@example.com");
-        owner = userRepositoryPort.save(owner);
-
-        // Create a theme
-        ThemeManifest themeManifest = new ThemeManifest();
-        themeManifest.setName("theme");
-        themeManifest.setVersion("1.0");
-        themeManifest.setDescription("description");
-        themeManifest.setAuthor("author");
-        themeManifest.setCreatedAt("createdAt");
-
-        Map<String, JsonNode> themeSchemas = new HashMap<>();
-        themeSchemas.put(
-                "product",
-                obj("{\"$ref\":\"#/definitions/product\",\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"definitions\":{\"product\":{\"type\":\"object\",\"required\":[\"name\",\"price\"],\"properties\":{\"name\":{\"type\":\"string\"},\"price\":{\"type\":\"number\"}},\"additionalProperties\":false}}}")
-        );
-        themeSchemas.put(
-                "category",
-                obj("{\"$ref\":\"#/definitions/category\",\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"definitions\":{\"category\":{\"type\":\"object\",\"required\":[\"name\",\"slug\"],\"properties\":{\"name\":{\"type\":\"string\"},\"slug\":{\"type\":\"string\"}},\"additionalProperties\":false}}}")
-        );
-        Map<String, JsonNode> uiSchemas = new HashMap<>();
-
-        Theme theme = new Theme(owner, "thumbnail_url", "location_url", true, themeManifest, themeSchemas, uiSchemas);
-        theme = themeRepositoryPort.save(theme);
-
-        Menu menu = new Menu("test menu", owner, theme);
-        menu = menuRepositoryPort.save(menu);
+        User owner = createTestUser("refuser1", "ref1@example.com");
+        Theme theme = createThemeWithSchemas(owner, "product", "category");
+        Menu menu = createTestMenu("test menu", owner, theme);
 
         // Create a category
         HydratedItemDto category = menuContentUseCase.createContent(
@@ -735,34 +554,9 @@ public class MenuContentServiceTest {
 
     @Test
     public void delete_content_bulk_should_throw_exception_when_items_referenced_as_targets() {
-        // Create an owner
-        User owner = new User("refuser2", "password", "ref2@example.com");
-        owner = userRepositoryPort.save(owner);
-
-        // Create a theme
-        ThemeManifest themeManifest = new ThemeManifest();
-        themeManifest.setName("theme");
-        themeManifest.setVersion("1.0");
-        themeManifest.setDescription("description");
-        themeManifest.setAuthor("author");
-        themeManifest.setCreatedAt("createdAt");
-
-        Map<String, JsonNode> themeSchemas = new HashMap<>();
-        themeSchemas.put(
-                "product",
-                obj("{\"$ref\":\"#/definitions/product\",\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"definitions\":{\"product\":{\"type\":\"object\",\"required\":[\"name\",\"price\"],\"properties\":{\"name\":{\"type\":\"string\"},\"price\":{\"type\":\"number\"}},\"additionalProperties\":false}}}")
-        );
-        themeSchemas.put(
-                "category",
-                obj("{\"$ref\":\"#/definitions/category\",\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"definitions\":{\"category\":{\"type\":\"object\",\"required\":[\"name\",\"slug\"],\"properties\":{\"name\":{\"type\":\"string\"},\"slug\":{\"type\":\"string\"}},\"additionalProperties\":false}}}")
-        );
-        Map<String, JsonNode> uiSchemas = new HashMap<>();
-
-        Theme theme = new Theme(owner, "thumbnail_url", "location_url", true, themeManifest, themeSchemas, uiSchemas);
-        theme = themeRepositoryPort.save(theme);
-
-        Menu menu = new Menu("test menu", owner, theme);
-        menu = menuRepositoryPort.save(menu);
+        User owner = createTestUser("refuser2", "ref2@example.com");
+        Theme theme = createThemeWithSchemas(owner, "product", "category");
+        Menu menu = createTestMenu("test menu", owner, theme);
 
         // Create categories
         HydratedItemDto category1 = menuContentUseCase.createContent(
@@ -832,30 +626,9 @@ public class MenuContentServiceTest {
 
     @Test
     public void delete_content_should_succeed_when_not_referenced() {
-        // Create an owner
-        User owner = new User("refuser3", "password", "ref3@example.com");
-        owner = userRepositoryPort.save(owner);
-
-        // Create a theme
-        ThemeManifest themeManifest = new ThemeManifest();
-        themeManifest.setName("theme");
-        themeManifest.setVersion("1.0");
-        themeManifest.setDescription("description");
-        themeManifest.setAuthor("author");
-        themeManifest.setCreatedAt("createdAt");
-
-        Map<String, JsonNode> themeSchemas = new HashMap<>();
-        themeSchemas.put(
-                "category",
-                obj("{\"$ref\":\"#/definitions/category\",\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"definitions\":{\"category\":{\"type\":\"object\",\"required\":[\"name\",\"slug\"],\"properties\":{\"name\":{\"type\":\"string\"},\"slug\":{\"type\":\"string\"}},\"additionalProperties\":false}}}")
-        );
-        Map<String, JsonNode> uiSchemas = new HashMap<>();
-
-        Theme theme = new Theme(owner, "thumbnail_url", "location_url", true, themeManifest, themeSchemas, uiSchemas);
-        theme = themeRepositoryPort.save(theme);
-
-        Menu menu = new Menu("test menu", owner, theme);
-        menu = menuRepositoryPort.save(menu);
+        User owner = createTestUser("refuser3", "ref3@example.com");
+        Theme theme = createThemeWithSchemas(owner, "category");
+        Menu menu = createTestMenu("test menu", owner, theme);
 
         // Create a category that is NOT referenced by anything
         HydratedItemDto category = menuContentUseCase.createContent(

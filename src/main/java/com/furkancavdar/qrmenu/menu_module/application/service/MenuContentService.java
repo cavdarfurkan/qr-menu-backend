@@ -185,11 +185,14 @@ public class MenuContentService implements MenuContentUseCase {
 
         validateUserAndMenu(currentUsername, menuId, collection);
 
+        // Remove duplicates from input IDs
+        Set<UUID> uniqueIds = new HashSet<>(itemIds);
+
         // Fetch all items to validate they exist and belong to the correct menu and collection
-        List<MenuContentItem> items = menuContentRepository.findAllByIdIn(new HashSet<>(itemIds));
+        List<MenuContentItem> items = menuContentRepository.findAllByIdIn(uniqueIds);
 
         // Validate all items exist
-        if (items.size() != itemIds.size()) {
+        if (items.size() != uniqueIds.size()) {
             throw new ResourceNotFoundException("One or more items not found");
         }
 
@@ -202,13 +205,8 @@ public class MenuContentService implements MenuContentUseCase {
                     "All items must belong to menu %d and collection %s".formatted(menuId, collection));
         }
 
-        // Check if any of the items are referenced as targets by other items
-        List<UUID> referencedItems = new ArrayList<>();
-        for (UUID itemId : itemIds) {
-            if (menuContentRepository.existsByTargetItemId(itemId)) {
-                referencedItems.add(itemId);
-            }
-        }
+        // Check if any of the items are referenced as targets by other items (single batch query)
+        Set<UUID> referencedItems = menuContentRepository.findReferencedTargetItemIds(uniqueIds);
 
         if (!referencedItems.isEmpty()) {
             throw new ReferencedItemException(
@@ -216,8 +214,8 @@ public class MenuContentService implements MenuContentUseCase {
                             .formatted(referencedItems.size(), collection, referencedItems));
         }
 
-        // Delete all items (cascade delete will handle relations where these items are sources)
-        items.forEach(menuContentRepository::delete);
+        // Delete all items in a single batch operation (cascade delete will handle relations where these items are sources)
+        menuContentRepository.deleteAll(items);
 
         log.info("Deleted {} menu content items from collection {}", items.size(), collection);
     }
