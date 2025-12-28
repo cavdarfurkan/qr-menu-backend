@@ -12,5 +12,5 @@ import lombok.Data;
 @Builder
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class MenuJobStatusResponse {
-    private MenuJobStatus menuJobStatus;
+  private MenuJobStatus menuJobStatus;
 }

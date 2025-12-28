@@ -5,11 +5,12 @@ import com.furkancavdar.qrmenu.theme_module.application.port.in.dto.ThemeManifes
 
 public class ThemeManifestResponseMapper {
 
-    private ThemeManifestResponseMapper() {
-        // Private constructor to prevent instantiation
-    }
+  private ThemeManifestResponseMapper() {
+    // Private constructor to prevent instantiation
+  }
 
-    public static ThemeManifestResponseDto fromThemeManifestResultDto(ThemeManifestResultDto themeManifestResultDto) {
-        return new ThemeManifestResponseDto(themeManifestResultDto.getThemeManifest());
-    }
+  public static ThemeManifestResponseDto fromThemeManifestResultDto(
+      ThemeManifestResultDto themeManifestResultDto) {
+    return new ThemeManifestResponseDto(themeManifestResultDto.getThemeManifest());
+  }
 }

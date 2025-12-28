@@ -13,6 +13,5 @@ import lombok.Data;
 @Builder
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class HydratedItemResponseDto {
-    @JsonUnwrapped
-    HydratedItemDto hydratedItem;
+  @JsonUnwrapped HydratedItemDto hydratedItem;
 }

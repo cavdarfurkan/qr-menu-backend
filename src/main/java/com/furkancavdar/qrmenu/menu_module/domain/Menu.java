@@ -8,23 +8,23 @@ import lombok.ToString;
 @Getter
 @ToString
 public class Menu {
-    private Long id;
-    private final String menuName;
-    private final User owner;
-    private final Theme selectedTheme;
+  private Long id;
+  private final String menuName;
+  private final User owner;
+  private final Theme selectedTheme;
 
-    public Menu(String menuName, User owner, Theme selectedTheme) {
-        this.menuName = menuName;
-        this.owner = owner;
-        this.selectedTheme = selectedTheme;
-    }
+  public Menu(String menuName, User owner, Theme selectedTheme) {
+    this.menuName = menuName;
+    this.owner = owner;
+    this.selectedTheme = selectedTheme;
+  }
 
-    public Menu(Long id, String menuName, User owner, Theme selectedTheme) {
-        this(menuName, owner, selectedTheme);
-        this.id = id;
-    }
+  public Menu(Long id, String menuName, User owner, Theme selectedTheme) {
+    this(menuName, owner, selectedTheme);
+    this.id = id;
+  }
 
-    public Boolean isOwner(String username) {
-        return owner.getUsername().equals(username);
-    }
+  public Boolean isOwner(String username) {
+    return owner.getUsername().equals(username);
+  }
 }

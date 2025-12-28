@@ -2,7 +2,6 @@ package com.furkancavdar.qrmenu.menu_module.application.port.out;
 
 import com.furkancavdar.qrmenu.menu_module.domain.MenuContentItem;
 import com.furkancavdar.qrmenu.menu_module.domain.MenuContentRelation;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -10,43 +9,45 @@ import java.util.UUID;
 
 public interface MenuContentRepositoryPort {
 
-    /*
-     * ###############
-     * MenuContentItem
-     * ###############
-     */
+  /*
+   * ###############
+   * MenuContentItem
+   * ###############
+   */
 
-    MenuContentItem save(MenuContentItem menuContentItem);
+  MenuContentItem save(MenuContentItem menuContentItem);
 
-    void delete(MenuContentItem menuContentItem);
+  void delete(MenuContentItem menuContentItem);
 
-    void deleteAll(List<MenuContentItem> menuContentItems);
+  void deleteAll(List<MenuContentItem> menuContentItems);
 
-    Optional<MenuContentItem> findById(UUID itemId);
+  Optional<MenuContentItem> findById(UUID itemId);
 
-    List<MenuContentItem> findByMenuIdAndCollectionName(Long menuId, String collectionName);
+  List<MenuContentItem> findByMenuIdAndCollectionName(Long menuId, String collectionName);
 
-    Optional<MenuContentItem> findByMenuIdAndCollectionNameAndId(Long menuId, String collectionName, UUID itemId);
+  Optional<MenuContentItem> findByMenuIdAndCollectionNameAndId(
+      Long menuId, String collectionName, UUID itemId);
 
-    List<MenuContentItem> findAllByIdIn(Set<UUID> ids);
+  List<MenuContentItem> findAllByIdIn(Set<UUID> ids);
 
-    /*
-     * ###################
-     * MenuContentRelation
-     * ###################
-     */
+  /*
+   * ###################
+   * MenuContentRelation
+   * ###################
+   */
 
-    void deleteBySourceAndField(MenuContentItem sourceItem, String fieldName);
+  void deleteBySourceAndField(MenuContentItem sourceItem, String fieldName);
 
-    MenuContentRelation save(MenuContentRelation menuContentRelation);
+  MenuContentRelation save(MenuContentRelation menuContentRelation);
 
-    List<MenuContentRelation> findBySourceItemId(UUID sourceItemId);
+  List<MenuContentRelation> findBySourceItemId(UUID sourceItemId);
 
-    List<MenuContentRelation> findBySourceItemIdAndFieldNameOrderByPositionAsc(UUID sourceItemId, String fieldName);
+  List<MenuContentRelation> findBySourceItemIdAndFieldNameOrderByPositionAsc(
+      UUID sourceItemId, String fieldName);
 
-    List<MenuContentRelation> findByTargetItemId(UUID targetItemId);
+  List<MenuContentRelation> findByTargetItemId(UUID targetItemId);
 
-    boolean existsByTargetItemId(UUID targetItemId);
+  boolean existsByTargetItemId(UUID targetItemId);
 
-    Set<UUID> findReferencedTargetItemIds(Set<UUID> targetItemIds);
+  Set<UUID> findReferencedTargetItemIds(Set<UUID> targetItemIds);
 }

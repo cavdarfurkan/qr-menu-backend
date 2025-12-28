@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginResultDto {
-    private UserDto user;
-    private JwtTokenPair jwtTokenPair;
+  private UserDto user;
+  private JwtTokenPair jwtTokenPair;
 }

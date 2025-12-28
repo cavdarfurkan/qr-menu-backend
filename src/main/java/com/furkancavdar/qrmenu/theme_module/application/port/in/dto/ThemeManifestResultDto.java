@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ThemeManifestResultDto {
-    private ThemeManifest themeManifest;
+  private ThemeManifest themeManifest;
 }

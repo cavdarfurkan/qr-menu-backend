@@ -4,122 +4,132 @@ import com.furkancavdar.qrmenu.menu_module.adapter.persistence.mapper.MenuConten
 import com.furkancavdar.qrmenu.menu_module.application.port.out.MenuContentRepositoryPort;
 import com.furkancavdar.qrmenu.menu_module.domain.MenuContentItem;
 import com.furkancavdar.qrmenu.menu_module.domain.MenuContentRelation;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class MenuContentAdapter implements MenuContentRepositoryPort {
 
-    private final JpaMenuContentItemRepository jpaMenuContentItemRepository;
-    private final JpaMenuContentRelationRepository jpaMenuContentRelationRepository;
+  private final JpaMenuContentItemRepository jpaMenuContentItemRepository;
+  private final JpaMenuContentRelationRepository jpaMenuContentRelationRepository;
 
-    /*
-     * ###############
-     * MenuContentItem
-     * ###############
-     */
+  /*
+   * ###############
+   * MenuContentItem
+   * ###############
+   */
 
-    @Override
-    public MenuContentItem save(MenuContentItem menuContentItem) {
-        return MenuContentEntityMapper.toMenuContentItem(
-                jpaMenuContentItemRepository.save(MenuContentEntityMapper.toMenuContentItemEntity(menuContentItem))
-        );
-    }
+  @Override
+  public MenuContentItem save(MenuContentItem menuContentItem) {
+    return MenuContentEntityMapper.toMenuContentItem(
+        jpaMenuContentItemRepository.save(
+            MenuContentEntityMapper.toMenuContentItemEntity(menuContentItem)));
+  }
 
-    @Override
-    public void delete(MenuContentItem menuContentItem) {
-        jpaMenuContentItemRepository.delete(
-                MenuContentEntityMapper.toMenuContentItemEntity(menuContentItem)
-        );
-    }
+  @Override
+  public void delete(MenuContentItem menuContentItem) {
+    jpaMenuContentItemRepository.delete(
+        MenuContentEntityMapper.toMenuContentItemEntity(menuContentItem));
+  }
 
-    @Override
-    public void deleteAll(List<MenuContentItem> menuContentItems) {
-        List<com.furkancavdar.qrmenu.menu_module.adapter.persistence.entity.MenuContentItemEntity> entities = 
-                menuContentItems.stream()
-                        .map(MenuContentEntityMapper::toMenuContentItemEntity)
-                        .toList();
-        jpaMenuContentItemRepository.deleteAll(entities);
-    }
-
-    @Override
-    public Optional<MenuContentItem> findById(UUID itemId) {
-        return jpaMenuContentItemRepository.findById(itemId).map(MenuContentEntityMapper::toMenuContentItem);
-    }
-
-    @Override
-    public List<MenuContentItem> findByMenuIdAndCollectionName(Long menuId, String collectionName) {
-        return jpaMenuContentItemRepository.findByMenu_IdAndCollectionName(menuId, collectionName)
-                .stream().map(MenuContentEntityMapper::toMenuContentItem).toList();
-    }
-
-    @Override
-    public Optional<MenuContentItem> findByMenuIdAndCollectionNameAndId(Long menuId, String collectionName, UUID itemId) {
-        return jpaMenuContentItemRepository.findByMenu_IdAndCollectionNameAndId(menuId, collectionName, itemId)
-                .map(MenuContentEntityMapper::toMenuContentItem);
-    }
-
-    @Override
-    public List<MenuContentItem> findAllByIdIn(Set<UUID> ids) {
-        return jpaMenuContentItemRepository.findAllByIdIn(ids).stream()
-                .map(MenuContentEntityMapper::toMenuContentItem)
+  @Override
+  public void deleteAll(List<MenuContentItem> menuContentItems) {
+    List<com.furkancavdar.qrmenu.menu_module.adapter.persistence.entity.MenuContentItemEntity>
+        entities =
+            menuContentItems.stream()
+                .map(MenuContentEntityMapper::toMenuContentItemEntity)
                 .toList();
-    }
+    jpaMenuContentItemRepository.deleteAll(entities);
+  }
 
-    /*
-     * ###################
-     * MenuContentRelation
-     * ###################
-     */
+  @Override
+  public Optional<MenuContentItem> findById(UUID itemId) {
+    return jpaMenuContentItemRepository
+        .findById(itemId)
+        .map(MenuContentEntityMapper::toMenuContentItem);
+  }
 
-    @Override
-    public void deleteBySourceAndField(MenuContentItem sourceItem, String fieldName) {
-        jpaMenuContentRelationRepository.deleteBySourceItemAndFieldName(MenuContentEntityMapper.toMenuContentItemEntity(sourceItem), fieldName);
-    }
+  @Override
+  public List<MenuContentItem> findByMenuIdAndCollectionName(Long menuId, String collectionName) {
+    return jpaMenuContentItemRepository
+        .findByMenu_IdAndCollectionName(menuId, collectionName)
+        .stream()
+        .map(MenuContentEntityMapper::toMenuContentItem)
+        .toList();
+  }
 
-    @Override
-    public MenuContentRelation save(MenuContentRelation menuContentRelation) {
-        return MenuContentEntityMapper.toMenuContentRelation(
-                jpaMenuContentRelationRepository.save(MenuContentEntityMapper.toMenuContentRelationEntity(menuContentRelation))
-        );
-    }
+  @Override
+  public Optional<MenuContentItem> findByMenuIdAndCollectionNameAndId(
+      Long menuId, String collectionName, UUID itemId) {
+    return jpaMenuContentItemRepository
+        .findByMenu_IdAndCollectionNameAndId(menuId, collectionName, itemId)
+        .map(MenuContentEntityMapper::toMenuContentItem);
+  }
 
-    @Override
-    public List<MenuContentRelation> findBySourceItemId(UUID sourceItemId) {
-        return jpaMenuContentRelationRepository.findBySourceItem_Id(sourceItemId).stream()
-                .map(MenuContentEntityMapper::toMenuContentRelation)
-                .toList();
-    }
+  @Override
+  public List<MenuContentItem> findAllByIdIn(Set<UUID> ids) {
+    return jpaMenuContentItemRepository.findAllByIdIn(ids).stream()
+        .map(MenuContentEntityMapper::toMenuContentItem)
+        .toList();
+  }
 
-    @Override
-    public List<MenuContentRelation> findBySourceItemIdAndFieldNameOrderByPositionAsc(UUID sourceItemId, String fieldName) {
-        return jpaMenuContentRelationRepository.findBySourceItem_IdAndFieldNameOrderByPositionAsc(sourceItemId, fieldName).stream()
-                .map(MenuContentEntityMapper::toMenuContentRelation)
-                .toList();
-    }
+  /*
+   * ###################
+   * MenuContentRelation
+   * ###################
+   */
 
-    @Override
-    public List<MenuContentRelation> findByTargetItemId(UUID targetItemId) {
-        return jpaMenuContentRelationRepository.findByTargetItem_Id(targetItemId).stream()
-                .map(MenuContentEntityMapper::toMenuContentRelation)
-                .toList();
-    }
+  @Override
+  public void deleteBySourceAndField(MenuContentItem sourceItem, String fieldName) {
+    jpaMenuContentRelationRepository.deleteBySourceItemAndFieldName(
+        MenuContentEntityMapper.toMenuContentItemEntity(sourceItem), fieldName);
+  }
 
-    @Override
-    public boolean existsByTargetItemId(UUID targetItemId) {
-        return jpaMenuContentRelationRepository.existsByTargetItem_Id(targetItemId);
-    }
+  @Override
+  public MenuContentRelation save(MenuContentRelation menuContentRelation) {
+    return MenuContentEntityMapper.toMenuContentRelation(
+        jpaMenuContentRelationRepository.save(
+            MenuContentEntityMapper.toMenuContentRelationEntity(menuContentRelation)));
+  }
 
-    @Override
-    public Set<UUID> findReferencedTargetItemIds(Set<UUID> targetItemIds) {
-        return jpaMenuContentRelationRepository.findReferencedTargetItemIds(targetItemIds);
-    }
+  @Override
+  public List<MenuContentRelation> findBySourceItemId(UUID sourceItemId) {
+    return jpaMenuContentRelationRepository.findBySourceItem_Id(sourceItemId).stream()
+        .map(MenuContentEntityMapper::toMenuContentRelation)
+        .toList();
+  }
+
+  @Override
+  public List<MenuContentRelation> findBySourceItemIdAndFieldNameOrderByPositionAsc(
+      UUID sourceItemId, String fieldName) {
+    return jpaMenuContentRelationRepository
+        .findBySourceItem_IdAndFieldNameOrderByPositionAsc(sourceItemId, fieldName)
+        .stream()
+        .map(MenuContentEntityMapper::toMenuContentRelation)
+        .toList();
+  }
+
+  @Override
+  public List<MenuContentRelation> findByTargetItemId(UUID targetItemId) {
+    return jpaMenuContentRelationRepository.findByTargetItem_Id(targetItemId).stream()
+        .map(MenuContentEntityMapper::toMenuContentRelation)
+        .toList();
+  }
+
+  @Override
+  public boolean existsByTargetItemId(UUID targetItemId) {
+    return jpaMenuContentRelationRepository.existsByTargetItem_Id(targetItemId);
+  }
+
+  @Override
+  public Set<UUID> findReferencedTargetItemIds(Set<UUID> targetItemIds) {
+    return jpaMenuContentRelationRepository.findReferencedTargetItemIds(targetItemIds);
+  }
 }

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.furkancavdar.qrmenu.menu_module.adapter.api.dto.payload.queue.BuildMenuJobDto;
 import io.lettuce.core.ClientOptions;
+import java.time.Duration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,88 +18,94 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import java.time.Duration;
-
 @Configuration
 public class RedisConfig {
 
-    @Value("${spring.data.redis.host}")
-    private String host;
+  @Value("${spring.data.redis.host}")
+  private String host;
 
-    @Value("${spring.data.redis.port}")
-    private int port;
+  @Value("${spring.data.redis.port}")
+  private int port;
 
-    // This is needed to avoid Redis CONFIG command issues in some environments
-//    @Bean
-//    public ConfigureRedisAction configureRedisAction() {
-//        return ConfigureRedisAction.NO_OP;
-//    }
+  // This is needed to avoid Redis CONFIG command issues in some environments
+  //    @Bean
+  //    public ConfigureRedisAction configureRedisAction() {
+  //        return ConfigureRedisAction.NO_OP;
+  //    }
 
-    @Bean
-    public LettuceConnectionFactory connectionFactory() {
-        RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration(host, port);
+  @Bean
+  public LettuceConnectionFactory connectionFactory() {
+    RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration(host, port);
 
-        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
-                .commandTimeout(Duration.ofMinutes(0))
-                .clientOptions(
-                        ClientOptions.builder()
-                                .autoReconnect(true)
-                                .disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS)
-                                .build()
-                )
-                .build();
+    LettuceClientConfiguration clientConfig =
+        LettuceClientConfiguration.builder()
+            .commandTimeout(Duration.ofMinutes(0))
+            .clientOptions(
+                ClientOptions.builder()
+                    .autoReconnect(true)
+                    .disconnectedBehavior(ClientOptions.DisconnectedBehavior.REJECT_COMMANDS)
+                    .build())
+            .build();
 
-        return new LettuceConnectionFactory(redisConfig, clientConfig);
-    }
+    return new LettuceConnectionFactory(redisConfig, clientConfig);
+  }
 
-    @Bean
-    public RedisTemplate<String, Object> redisTemplate(LettuceConnectionFactory connectionFactory) {
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(connectionFactory);
+  @Bean
+  public RedisTemplate<String, Object> redisTemplate(LettuceConnectionFactory connectionFactory) {
+    RedisTemplate<String, Object> template = new RedisTemplate<>();
+    template.setConnectionFactory(connectionFactory);
 
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-//        mapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL);
-        mapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+    //        mapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance,
+    // ObjectMapper.DefaultTyping.NON_FINAL);
+    mapper.activateDefaultTyping(
+        LaissezFaireSubTypeValidator.instance,
+        ObjectMapper.DefaultTyping.NON_FINAL,
+        JsonTypeInfo.As.PROPERTY);
 
-        Jackson2JsonRedisSerializer<Object> serializer = new Jackson2JsonRedisSerializer<>(mapper, Object.class);
+    Jackson2JsonRedisSerializer<Object> serializer =
+        new Jackson2JsonRedisSerializer<>(mapper, Object.class);
 
-        template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(serializer);
-        template.setHashKeySerializer(new StringRedisSerializer());
-        template.setHashValueSerializer(serializer);
+    template.setKeySerializer(new StringRedisSerializer());
+    template.setValueSerializer(serializer);
+    template.setHashKeySerializer(new StringRedisSerializer());
+    template.setHashValueSerializer(serializer);
 
-        template.afterPropertiesSet();
-        return template;
-    }
+    template.afterPropertiesSet();
+    return template;
+  }
 
-    @Bean
-    public RedisTemplate<String, BuildMenuJobDto> buildMenuJobRedisTemplate(LettuceConnectionFactory connectionFactory) {
-        RedisTemplate<String, BuildMenuJobDto> t = new RedisTemplate<>();
-        t.setConnectionFactory(connectionFactory);
+  @Bean
+  public RedisTemplate<String, BuildMenuJobDto> buildMenuJobRedisTemplate(
+      LettuceConnectionFactory connectionFactory) {
+    RedisTemplate<String, BuildMenuJobDto> t = new RedisTemplate<>();
+    t.setConnectionFactory(connectionFactory);
 
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
 
-        Jackson2JsonRedisSerializer<BuildMenuJobDto> serializer = new Jackson2JsonRedisSerializer<>(mapper, BuildMenuJobDto.class);
+    Jackson2JsonRedisSerializer<BuildMenuJobDto> serializer =
+        new Jackson2JsonRedisSerializer<>(mapper, BuildMenuJobDto.class);
 
-        t.setKeySerializer(new StringRedisSerializer());
-        t.setValueSerializer(serializer);
-        t.afterPropertiesSet();
-        return t;
-    }
+    t.setKeySerializer(new StringRedisSerializer());
+    t.setValueSerializer(serializer);
+    t.afterPropertiesSet();
+    return t;
+  }
 
-//    @Bean(name = "queueConsumerClient")
-//    public RedisTemplate<String, String> queueConsumerRedisTemplate(LettuceConnectionFactory connectionFactory) {
-//        RedisTemplate<String, String> template = new RedisTemplate<>();
-//
-//        connectionFactory.afterPropertiesSet();
-//        template.setConnectionFactory(connectionFactory);
-//
-//        template.setKeySerializer(new StringRedisSerializer());
-//        template.setValueSerializer(new StringRedisSerializer());
-//
-//        template.afterPropertiesSet();
-//        return template;
-//    }
+  //    @Bean(name = "queueConsumerClient")
+  //    public RedisTemplate<String, String> queueConsumerRedisTemplate(LettuceConnectionFactory
+  // connectionFactory) {
+  //        RedisTemplate<String, String> template = new RedisTemplate<>();
+  //
+  //        connectionFactory.afterPropertiesSet();
+  //        template.setConnectionFactory(connectionFactory);
+  //
+  //        template.setKeySerializer(new StringRedisSerializer());
+  //        template.setValueSerializer(new StringRedisSerializer());
+  //
+  //        template.afterPropertiesSet();
+  //        return template;
+  //    }
 }

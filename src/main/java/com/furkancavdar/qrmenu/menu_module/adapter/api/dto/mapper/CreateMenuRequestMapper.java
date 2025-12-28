@@ -4,19 +4,13 @@ import com.furkancavdar.qrmenu.menu_module.adapter.api.dto.payload.request.Creat
 import com.furkancavdar.qrmenu.menu_module.application.port.in.dto.MenuDto;
 
 public class CreateMenuRequestMapper {
-    private CreateMenuRequestMapper() {
+  private CreateMenuRequestMapper() {}
+
+  public static MenuDto toMenuDto(CreateMenuRequestDto dto, String ownerUsername) {
+    if (dto == null) {
+      return null;
     }
 
-    public static MenuDto toMenuDto(CreateMenuRequestDto dto, String ownerUsername) {
-        if (dto == null) {
-            return null;
-        }
-
-        return new MenuDto(
-                null,
-                dto.getMenuName(),
-                ownerUsername,
-                dto.getSelectedThemeId()
-        );
-    }
+    return new MenuDto(null, dto.getMenuName(), ownerUsername, dto.getSelectedThemeId());
+  }
 }

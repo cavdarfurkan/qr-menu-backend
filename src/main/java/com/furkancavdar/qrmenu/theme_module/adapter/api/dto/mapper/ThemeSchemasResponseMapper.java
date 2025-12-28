@@ -5,15 +5,15 @@ import com.furkancavdar.qrmenu.theme_module.application.port.in.dto.ThemeSchemas
 
 public class ThemeSchemasResponseMapper {
 
-    private ThemeSchemasResponseMapper() {
-        // Private constructor to prevent instantiation
-    }
+  private ThemeSchemasResponseMapper() {
+    // Private constructor to prevent instantiation
+  }
 
-    public static ThemeSchemasResponseDto fromThemeSchemasResultDto(ThemeSchemasResultDto themeSchemasResultDto) {
-        return new ThemeSchemasResponseDto(
-                themeSchemasResultDto.getSchemasCount(),
-                themeSchemasResultDto.getThemeSchemas(),
-                themeSchemasResultDto.getUiSchemas()
-        );
-    }
+  public static ThemeSchemasResponseDto fromThemeSchemasResultDto(
+      ThemeSchemasResultDto themeSchemasResultDto) {
+    return new ThemeSchemasResponseDto(
+        themeSchemasResultDto.getSchemasCount(),
+        themeSchemasResultDto.getThemeSchemas(),
+        themeSchemasResultDto.getUiSchemas());
+  }
 }

@@ -13,7 +13,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class UnregisterThemeRequestDto {
-    @NotNull
-    @Positive
-    private Long themeId;
+  @NotNull @Positive private Long themeId;
 }

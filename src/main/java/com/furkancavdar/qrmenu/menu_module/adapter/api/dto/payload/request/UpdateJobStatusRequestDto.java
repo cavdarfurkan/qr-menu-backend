@@ -13,6 +13,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class UpdateJobStatusRequestDto {
-    @NotNull
-    private MenuJobStatus status;
+  @NotNull private MenuJobStatus status;
 }

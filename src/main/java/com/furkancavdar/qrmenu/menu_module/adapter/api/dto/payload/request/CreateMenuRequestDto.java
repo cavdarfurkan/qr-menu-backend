@@ -14,10 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class CreateMenuRequestDto {
-    @NotBlank
-    private String menuName;
+  @NotBlank private String menuName;
 
-    @NotNull
-    @Positive
-    private Long selectedThemeId;
+  @NotNull @Positive private Long selectedThemeId;
 }

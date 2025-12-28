@@ -5,11 +5,11 @@ import com.furkancavdar.qrmenu.menu_module.application.port.in.dto.BuildMenuResu
 
 public class BuildMenuResponseMapper {
 
-    private BuildMenuResponseMapper() {
-        // Private constructor to prevent instantiation
-    }
+  private BuildMenuResponseMapper() {
+    // Private constructor to prevent instantiation
+  }
 
-    public static BuildMenuResponseDto fromBuildMenuResultDto(BuildMenuResultDto buildMenuResultDto) {
-        return new BuildMenuResponseDto(buildMenuResultDto.getStatusUrl());
-    }
+  public static BuildMenuResponseDto fromBuildMenuResultDto(BuildMenuResultDto buildMenuResultDto) {
+    return new BuildMenuResponseDto(buildMenuResultDto.getStatusUrl());
+  }
 }

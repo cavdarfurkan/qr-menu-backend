@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BuildMenuResultDto {
-    private String statusUrl;
+  private String statusUrl;
 }

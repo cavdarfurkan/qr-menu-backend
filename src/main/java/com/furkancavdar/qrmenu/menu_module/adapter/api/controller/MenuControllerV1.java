@@ -12,6 +12,7 @@ import com.furkancavdar.qrmenu.menu_module.application.port.in.dto.UserMenuDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -21,86 +22,83 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/menu")
 @RequiredArgsConstructor
 public class MenuControllerV1 {
 
-    private final MenuUseCase menuUseCase;
+  private final MenuUseCase menuUseCase;
 
-    @PostMapping("/create")
-    public ResponseEntity<ApiResponse<String>> createMenu(
-            @Valid @RequestBody CreateMenuRequestDto createMenuRequestDto,
-            @AuthenticationPrincipal UserDetails userDetails) {
-        log.info("MenuControllerV1:createMenu");
-        MenuDto menuDto = CreateMenuRequestMapper.toMenuDto(createMenuRequestDto, userDetails.getUsername());
-        try {
-            menuUseCase.createMenu(menuDto);
-        } catch (Exception e) {
-            log.error("MenuControllerV1:createMenu error {}", e.getMessage());
-            return ResponseEntity
-                    .badRequest()
-                    .body(ApiResponse.error(e.getMessage()));
-        }
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Menu created successfully"));
+  @PostMapping("/create")
+  public ResponseEntity<ApiResponse<String>> createMenu(
+      @Valid @RequestBody CreateMenuRequestDto createMenuRequestDto,
+      @AuthenticationPrincipal UserDetails userDetails) {
+    log.info("MenuControllerV1:createMenu");
+    MenuDto menuDto =
+        CreateMenuRequestMapper.toMenuDto(createMenuRequestDto, userDetails.getUsername());
+    try {
+      menuUseCase.createMenu(menuDto);
+    } catch (Exception e) {
+      log.error("MenuControllerV1:createMenu error {}", e.getMessage());
+      return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
     }
 
-    @DeleteMapping("/delete/{menuId}")
-    public ResponseEntity<ApiResponse<?>> deleteMenu(
-            @Valid @PathVariable @NotNull @Positive Long menuId,
-            @AuthenticationPrincipal UserDetails userDetails) {
-        log.info("MenuControllerV1:deleteMenu");
-        try {
-            Boolean isAdmin = userDetails.getAuthorities().stream()
-                    .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
-            menuUseCase.deleteMenu(menuId, userDetails.getUsername(), isAdmin);
-        } catch (Exception e) {
-            log.error("MenuControllerV1:deleteMenu error {}", e.getMessage());
-            return ResponseEntity
-                    .badRequest()
-                    .body(ApiResponse.error(e.getMessage()));
-        }
-        return ResponseEntity.ok(ApiResponse.success("Menu deleted successfully"));
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(ApiResponse.success("Menu created successfully"));
+  }
+
+  @DeleteMapping("/delete/{menuId}")
+  public ResponseEntity<ApiResponse<?>> deleteMenu(
+      @Valid @PathVariable @NotNull @Positive Long menuId,
+      @AuthenticationPrincipal UserDetails userDetails) {
+    log.info("MenuControllerV1:deleteMenu");
+    try {
+      Boolean isAdmin =
+          userDetails.getAuthorities().stream()
+              .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
+      menuUseCase.deleteMenu(menuId, userDetails.getUsername(), isAdmin);
+    } catch (Exception e) {
+      log.error("MenuControllerV1:deleteMenu error {}", e.getMessage());
+      return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
     }
+    return ResponseEntity.ok(ApiResponse.success("Menu deleted successfully"));
+  }
 
-    @PostMapping("/build")
-    public ResponseEntity<ApiResponse<BuildMenuResponseDto>> buildMenu(
-            @RequestBody BuildMenuRequestDto buildMenuRequestDto,
-            @AuthenticationPrincipal UserDetails userDetails) {
-        Long menuId = buildMenuRequestDto.getMenuId();
-        String ownerName = userDetails.getUsername();
+  @PostMapping("/build")
+  public ResponseEntity<ApiResponse<BuildMenuResponseDto>> buildMenu(
+      @RequestBody BuildMenuRequestDto buildMenuRequestDto,
+      @AuthenticationPrincipal UserDetails userDetails) {
+    Long menuId = buildMenuRequestDto.getMenuId();
+    String ownerName = userDetails.getUsername();
 
-        try {
-            BuildMenuResponseDto response = BuildMenuResponseMapper
-                    .fromBuildMenuResultDto(menuUseCase.buildMenu(menuId, ownerName));
+    try {
+      BuildMenuResponseDto response =
+          BuildMenuResponseMapper.fromBuildMenuResultDto(menuUseCase.buildMenu(menuId, ownerName));
 
-            return ResponseEntity
-                    .accepted()
-                    .header(HttpHeaders.LOCATION, response.getStatusUrl())
-                    .body(ApiResponse.success("Menu build request has been accepted for processing", response));
-        } catch (Exception e) {
-            log.error("MenuControllerV1:buildMenu error {}", e.getMessage());
-            return ResponseEntity
-                    .badRequest()
-                    .body(ApiResponse.error(e.getMessage()));
-        }
+      return ResponseEntity.accepted()
+          .header(HttpHeaders.LOCATION, response.getStatusUrl())
+          .body(
+              ApiResponse.success("Menu build request has been accepted for processing", response));
+    } catch (Exception e) {
+      log.error("MenuControllerV1:buildMenu error {}", e.getMessage());
+      return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
     }
+  }
 
-    @GetMapping("/all")
-    public ResponseEntity<ApiResponse<List<UserMenuDto>>> getAllUserMenus(@AuthenticationPrincipal UserDetails userDetails) {
-        String ownerName = userDetails.getUsername();
-        List<UserMenuDto> menus = menuUseCase.allUserMenus(ownerName);
-        return ResponseEntity.ok(ApiResponse.success(menus));
-    }
+  @GetMapping("/all")
+  public ResponseEntity<ApiResponse<List<UserMenuDto>>> getAllUserMenus(
+      @AuthenticationPrincipal UserDetails userDetails) {
+    String ownerName = userDetails.getUsername();
+    List<UserMenuDto> menus = menuUseCase.allUserMenus(ownerName);
+    return ResponseEntity.ok(ApiResponse.success(menus));
+  }
 
-    @GetMapping("/{menuId}")
-    public ResponseEntity<ApiResponse<MenuDto>> getMenuById(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long menuId) {
-        String ownerName = userDetails.getUsername();
-        MenuDto menu = menuUseCase.getMenu(menuId, ownerName);
-        return ResponseEntity.ok(ApiResponse.success(menu));
-    }
+  @GetMapping("/{menuId}")
+  public ResponseEntity<ApiResponse<MenuDto>> getMenuById(
+      @AuthenticationPrincipal UserDetails userDetails, @PathVariable Long menuId) {
+    String ownerName = userDetails.getUsername();
+    MenuDto menu = menuUseCase.getMenu(menuId, ownerName);
+    return ResponseEntity.ok(ApiResponse.success(menu));
+  }
 }

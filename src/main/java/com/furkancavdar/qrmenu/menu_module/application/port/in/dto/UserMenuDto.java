@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserMenuDto {
-    private Long menuId;
-    private String menuName;
+  private Long menuId;
+  private String menuName;
 }

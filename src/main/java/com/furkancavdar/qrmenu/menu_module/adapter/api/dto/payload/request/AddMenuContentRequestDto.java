@@ -5,24 +5,21 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class AddMenuContentRequestDto {
-    @NotBlank
-    private String collection;
+  @NotBlank private String collection;
 
-    @NotNull
-    private JsonNode content;
+  @NotNull private JsonNode content;
 
-    private Map<@NotBlank String, @NotNull List<UUID>> relations; // field -> ordered targets
+  private Map<@NotBlank String, @NotNull List<UUID>> relations; // field -> ordered targets
 }

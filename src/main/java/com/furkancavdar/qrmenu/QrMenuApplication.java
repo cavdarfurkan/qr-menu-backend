@@ -12,19 +12,17 @@ import org.springframework.context.event.EventListener;
 @Slf4j
 @SpringBootApplication
 public class QrMenuApplication {
+  public static void main(String[] args) {
+    SpringApplication.run(QrMenuApplication.class, args);
+  }
 
-    public static void main(String[] args) {
-        SpringApplication.run(QrMenuApplication.class, args);
-    }
+  @Bean
+  public JsonSchemaFactory jsonSchemaFactory() {
+    return JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7);
+  }
 
-    @Bean
-    public JsonSchemaFactory jsonSchemaFactory() {
-        return JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7);
-    }
-
-    @EventListener(ApplicationReadyEvent.class)
-    public void checkVirtualThreads() {
-        log.info("Virtual threads enabled: {}", Thread.currentThread().isVirtual());
-    }
-
+  @EventListener(ApplicationReadyEvent.class)
+  public void checkVirtualThreads() {
+    log.info("Virtual threads enabled: {}", Thread.currentThread().isVirtual());
+  }
 }

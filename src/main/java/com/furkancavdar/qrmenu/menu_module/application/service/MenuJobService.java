@@ -14,22 +14,25 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class MenuJobService implements MenuJobUseCase {
 
-    private final MenuJobRepositoryPort menuJobRepository;
+  private final MenuJobRepositoryPort menuJobRepository;
 
-    @Override
-    public void save(MenuJob menuJob) {
-        menuJobRepository.upsert(menuJob);
-    }
+  @Override
+  public void save(MenuJob menuJob) {
+    menuJobRepository.upsert(menuJob);
+  }
 
-    @Override
-    public MenuJobStatus getJobStatus(String jobId) {
-        MenuJob menuJob = menuJobRepository.findById(jobId).orElseThrow(() ->
-                new ResourceNotFoundException("Menu Job with ID " + jobId + " not found"));
-        return menuJob.getStatus();
-    }
+  @Override
+  public MenuJobStatus getJobStatus(String jobId) {
+    MenuJob menuJob =
+        menuJobRepository
+            .findById(jobId)
+            .orElseThrow(
+                () -> new ResourceNotFoundException("Menu Job with ID " + jobId + " not found"));
+    return menuJob.getStatus();
+  }
 
-    @Override
-    public Boolean updateJobStatus(String jobId, MenuJobStatus status) {
-        return menuJobRepository.updateStatus(jobId, status);
-    }
+  @Override
+  public Boolean updateJobStatus(String jobId, MenuJobStatus status) {
+    return menuJobRepository.updateStatus(jobId, status);
+  }
 }

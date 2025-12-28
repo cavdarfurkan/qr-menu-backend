@@ -9,6 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TerminateRequestDto {
-    @NotBlank
-    String sessionId;
+  @NotBlank String sessionId;
 }

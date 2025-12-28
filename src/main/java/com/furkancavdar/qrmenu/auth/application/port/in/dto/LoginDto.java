@@ -9,13 +9,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginDto {
-    @NotBlank
-    private String username;
+  @NotBlank private String username;
 
-    @NotBlank
-    private String password;
+  @NotBlank private String password;
 
-    private String ip;
+  private String ip;
 
-    private String userAgentString;
+  private String userAgentString;
 }

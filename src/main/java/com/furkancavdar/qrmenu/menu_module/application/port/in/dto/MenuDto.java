@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MenuDto {
-    private Long menuId;
-    private String menuName;
-    private String ownerUsername;
-    private Long selectedThemeId;
+  private Long menuId;
+  private String menuName;
+  private String ownerUsername;
+  private Long selectedThemeId;
 }

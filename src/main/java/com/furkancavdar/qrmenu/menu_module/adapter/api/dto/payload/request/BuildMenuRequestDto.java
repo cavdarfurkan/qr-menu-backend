@@ -12,6 +12,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class BuildMenuRequestDto {
-    @NotNull
-    private Long menuId;
+  @NotNull private Long menuId;
 }

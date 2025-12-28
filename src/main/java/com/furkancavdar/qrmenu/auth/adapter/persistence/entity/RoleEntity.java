@@ -1,14 +1,12 @@
 package com.furkancavdar.qrmenu.auth.adapter.persistence.entity;
 
-import com.furkancavdar.qrmenu.auth.adapter.persistence.entity.UserEntity;
 import jakarta.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "roles")
@@ -18,13 +16,13 @@ import java.util.Set;
 @AllArgsConstructor
 public class RoleEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String name;
+  @Column(nullable = false, unique = true)
+  private String name;
 
-    @ManyToMany(mappedBy = "roles")
-    private Set<UserEntity> users = new HashSet<>();
-} 
+  @ManyToMany(mappedBy = "roles")
+  private Set<UserEntity> users = new HashSet<>();
+}

@@ -5,11 +5,11 @@ import com.furkancavdar.qrmenu.auth.application.port.in.dto.RefreshResultDto;
 
 public class RefreshResponseMapper {
 
-    private RefreshResponseMapper() {
-        // Private constructor to prevent instantiation
-    }
+  private RefreshResponseMapper() {
+    // Private constructor to prevent instantiation
+  }
 
-    public static RefreshResponseDto fromRefreshResultDto(RefreshResultDto refreshResultDto) {
-        return new RefreshResponseDto(refreshResultDto.getJwtTokenPair().getAccessToken());
-    }
+  public static RefreshResponseDto fromRefreshResultDto(RefreshResultDto refreshResultDto) {
+    return new RefreshResponseDto(refreshResultDto.getJwtTokenPair().getAccessToken());
+  }
 }

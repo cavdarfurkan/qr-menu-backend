@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class RegisterThemeRequestDto {
-    private Boolean isFree = Boolean.TRUE;
+  private Boolean isFree = Boolean.TRUE;
 }

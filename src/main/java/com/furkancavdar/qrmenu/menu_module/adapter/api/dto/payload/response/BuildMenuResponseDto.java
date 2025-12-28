@@ -11,5 +11,5 @@ import lombok.Data;
 @Builder
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class BuildMenuResponseDto {
-    private String statusUrl;
+  private String statusUrl;
 }

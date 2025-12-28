@@ -5,19 +5,15 @@ import com.furkancavdar.qrmenu.auth.domain.User;
 
 public class RegisterUserDtoMapper {
 
-    private RegisterUserDtoMapper() {
-        // Private constructor to prevent instantiation
+  private RegisterUserDtoMapper() {
+    // Private constructor to prevent instantiation
+  }
+
+  public static User toEntity(RegisterDto registerDto) {
+    if (registerDto == null) {
+      return null;
     }
 
-    public static User toEntity(RegisterDto registerDto) {
-        if (registerDto == null) {
-            return null;
-        }
-
-        return new User(
-                registerDto.getUsername(),
-                registerDto.getPassword(),
-                registerDto.getEmail()
-        );
-    }
+    return new User(registerDto.getUsername(), registerDto.getPassword(), registerDto.getEmail());
+  }
 }

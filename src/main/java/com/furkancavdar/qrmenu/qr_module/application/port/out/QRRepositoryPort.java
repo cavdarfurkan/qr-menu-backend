@@ -2,9 +2,7 @@ package com.furkancavdar.qrmenu.qr_module.application.port.out;
 
 import com.furkancavdar.qrmenu.qr_module.domain.QR;
 
-/**
- * QRRepositoryPort
- */
+/** QRRepositoryPort */
 public interface QRRepositoryPort {
-	QRRepositoryPort save(QR qr);
+  QRRepositoryPort save(QR qr);
 }

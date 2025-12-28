@@ -5,13 +5,11 @@ import com.furkancavdar.qrmenu.menu_module.application.port.in.dto.HydratedItemD
 
 public class HydratedItemResponseMapper {
 
-    private HydratedItemResponseMapper() {
-        // Private constructor to prevent instantiation
-    }
+  private HydratedItemResponseMapper() {
+    // Private constructor to prevent instantiation
+  }
 
-    public static HydratedItemResponseDto fromHydratedItemDto(HydratedItemDto hydratedItemDto) {
-        return HydratedItemResponseDto.builder()
-                .hydratedItem(hydratedItemDto)
-                .build();
-    }
+  public static HydratedItemResponseDto fromHydratedItemDto(HydratedItemDto hydratedItemDto) {
+    return HydratedItemResponseDto.builder().hydratedItem(hydratedItemDto).build();
+  }
 }

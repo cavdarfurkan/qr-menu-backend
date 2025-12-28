@@ -12,8 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class QRDto {
-    private Long id;
-    private String qrUrl;
-    @Default
-    private QRSize qrSize = new QRSize(128, 128);
+  private Long id;
+  private String qrUrl;
+  @Default private QRSize qrSize = new QRSize(128, 128);
 }

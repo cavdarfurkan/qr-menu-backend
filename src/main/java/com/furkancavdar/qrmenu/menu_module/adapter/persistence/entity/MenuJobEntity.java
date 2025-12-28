@@ -14,12 +14,12 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MenuJobEntity {
-    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private String id;
+  @Id
+  //    @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", nullable = false)
+  private String id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "menu_job_status", nullable = false)
-    private MenuJobStatus menuJobStatus;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "menu_job_status", nullable = false)
+  private MenuJobStatus menuJobStatus;
 }

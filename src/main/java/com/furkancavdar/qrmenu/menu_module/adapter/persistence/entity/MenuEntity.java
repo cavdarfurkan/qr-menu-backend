@@ -15,19 +15,19 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MenuEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", nullable = false)
+  private Long id;
 
-    @Column(name = "menu_name", nullable = false)
-    private String menuName;
+  @Column(name = "menu_name", nullable = false)
+  private String menuName;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "owner_id", nullable = false)
-    private UserEntity owner;
+  @ManyToOne(optional = false)
+  @JoinColumn(name = "owner_id", nullable = false)
+  private UserEntity owner;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "selected_theme_id", nullable = false)
-    private ThemeEntity selectedTheme;
+  @ManyToOne(optional = false)
+  @JoinColumn(name = "selected_theme_id", nullable = false)
+  private ThemeEntity selectedTheme;
 }

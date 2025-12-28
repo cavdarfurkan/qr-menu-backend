@@ -11,20 +11,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/qr")
 public class QRController {
-    private final GenerateQRService generateQRService;
+  private final GenerateQRService generateQRService;
 
-    public QRController(GenerateQRService generateQRService) {
-        this.generateQRService = generateQRService;
-    }
+  public QRController(GenerateQRService generateQRService) {
+    this.generateQRService = generateQRService;
+  }
 
-    @GetMapping("/test")
-    public ResponseEntity<String> test(@PathParam("foo") String foo) {
-        return new ResponseEntity<>(foo, HttpStatus.OK);
-    }
+  @GetMapping("/test")
+  public ResponseEntity<String> test(@PathParam("foo") String foo) {
+    return new ResponseEntity<>(foo, HttpStatus.OK);
+  }
 
-//    @PostMapping
-//    public GenerateQRResponse generate(@RequestBody GenerateQRRequest generateQRRequest) {
-//        QR qr = generateQRService.generateQR(generateQRRequest);
-//        return new GenerateQRResponse(qr.qrUrl());
-//    }
+  //    @PostMapping
+  //    public GenerateQRResponse generate(@RequestBody GenerateQRRequest generateQRRequest) {
+  //        QR qr = generateQRService.generateQR(generateQRRequest);
+  //        return new GenerateQRResponse(qr.qrUrl());
+  //    }
 }

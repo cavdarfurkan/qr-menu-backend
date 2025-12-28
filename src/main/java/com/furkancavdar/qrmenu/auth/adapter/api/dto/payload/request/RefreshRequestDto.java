@@ -5,6 +5,5 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-//@AllArgsConstructor
-public class RefreshRequestDto {
-}
+// @AllArgsConstructor
+public class RefreshRequestDto {}

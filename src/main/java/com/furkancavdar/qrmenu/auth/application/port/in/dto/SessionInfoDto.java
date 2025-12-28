@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SessionInfoDto {
-    // TODO: Store session sessionId, login time, ip, device info
-    // Then rewrite the session related methods @JwtTokenService and @JwtTokenUtil
-    private String sessionId;
+  // TODO: Store session sessionId, login time, ip, device info
+  // Then rewrite the session related methods @JwtTokenService and @JwtTokenUtil
+  private String sessionId;
 }

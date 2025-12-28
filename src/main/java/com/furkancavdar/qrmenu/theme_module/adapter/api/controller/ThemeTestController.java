@@ -9,17 +9,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/theme/test")
 public class ThemeTestController {
 
-    private final StringRedisTemplate stringRedisTemplate;
+  private final StringRedisTemplate stringRedisTemplate;
 
-    public ThemeTestController(StringRedisTemplate stringRedisTemplate) {
-        this.stringRedisTemplate = stringRedisTemplate;
-    }
+  public ThemeTestController(StringRedisTemplate stringRedisTemplate) {
+    this.stringRedisTemplate = stringRedisTemplate;
+  }
 
-    @GetMapping("/build")
-    public void test() {
-//        stringRedisTemplate.executePipelined((RedisCallback<String>) connection -> {
-//        });
-        String job = "{\"id\":\"aaa\", \"time\": \"" + System.currentTimeMillis() + "\"}";
-        stringRedisTemplate.opsForList().leftPush("queue:build:main", job);
-    }
+  @GetMapping("/build")
+  public void test() {
+    //        stringRedisTemplate.executePipelined((RedisCallback<String>) connection -> {
+    //        });
+    String job = "{\"id\":\"aaa\", \"time\": \"" + System.currentTimeMillis() + "\"}";
+    stringRedisTemplate.opsForList().leftPush("queue:build:main", job);
+  }
 }

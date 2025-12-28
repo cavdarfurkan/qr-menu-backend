@@ -13,6 +13,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class ThemeManifestResponseDto {
-    @JsonUnwrapped
-    private ThemeManifest themeManifest;
+  @JsonUnwrapped private ThemeManifest themeManifest;
 }
