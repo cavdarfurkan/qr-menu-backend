@@ -10,6 +10,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -41,11 +42,16 @@ public class SessionService implements SessionUseCase {
             .findBySessionId(sessionId)
             .orElseThrow(() -> new NullPointerException("Session " + sessionId + " not found"));
 
-    jwtTokenUseCase.blacklistJti(
-        sessionMetadata.getRefreshJti(),
-        "Session is terminated",
-        (sessionMetadata.getExpiresAt() + 1000L) - System.currentTimeMillis());
-    sessionRepository.deleteBySessionId(sessionId);
+    try {
+      long expirationTime = (sessionMetadata.getExpiresAt() + 1000L) - System.currentTimeMillis();
+      if (expirationTime > 0) {
+        jwtTokenUseCase.blacklistJti(
+            sessionMetadata.getRefreshJti(), "Session is terminated", expirationTime);
+      }
+      sessionRepository.deleteBySessionId(sessionId);
+    } catch (Exception e) {
+      log.error("Session {} termination failed: {}", sessionId, e.getMessage());
+    }
   }
 
   @Override
@@ -54,6 +60,13 @@ public class SessionService implements SessionUseCase {
     activeSessions.stream()
         .filter(session -> !session.getSessionId().equals(currentSessionId))
         .forEach(session -> this.terminateSession(username, session.getSessionId()));
+  }
+
+  @Override
+  @Scheduled(fixedRate = 86400000) // 1 day
+  public void terminateExpiredSessions() {
+    int itemCount = sessionRepository.deleteAllExpiredSessions();
+    // TODO: Write to db (maybe)
   }
 
   @Override

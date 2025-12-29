@@ -2,15 +2,16 @@ package com.furkancavdar.qrmenu.auth.adapter.persistence.repository;
 
 import com.furkancavdar.qrmenu.auth.application.port.out.SessionRepositoryPort;
 import com.furkancavdar.qrmenu.auth.domain.SessionMetadata;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class SessionAdapter implements SessionRepositoryPort {
@@ -93,6 +94,50 @@ public class SessionAdapter implements SessionRepositoryPort {
     }
 
     return redisTemplate.<String, SessionMetadata>opsForHash().multiGet(ALL_SESSIONS, sessionIds);
+  }
+
+  /**
+   * Delete all expired sessions.
+   *
+   * @return Deleted item count
+   * @author Furkan Çavdar
+   * @see SessionMetadata
+   * @since 1.0.0
+   */
+  @Override
+  public int deleteAllExpiredSessions() {
+    try (Cursor<Map.Entry<String, SessionMetadata>> cursor =
+        redisTemplate
+            .<String, SessionMetadata>opsForHash()
+            .scan(ALL_SESSIONS, ScanOptions.scanOptions().count(1000L).build())) {
+      Map<String, String> toDelete = new HashMap<>();
+
+      cursor.forEachRemaining(
+          entry -> {
+            String sessionId = entry.getKey();
+            SessionMetadata sessionMetadata = entry.getValue();
+
+            if (System.currentTimeMillis() > sessionMetadata.getExpiresAt() + 1000L) {
+              String username = sessionMetadata.getUsername();
+              String userSessionsKey = String.format(USER_SESSIONS, username);
+
+              toDelete.put(sessionId, userSessionsKey);
+            }
+          });
+
+      toDelete.forEach(
+          (key, value) -> {
+            stringRedisTemplate.opsForSet().remove(value, key);
+            redisTemplate.opsForHash().delete(ALL_SESSIONS, key);
+
+            log.info("Cleaned up expired sessions: {}", toDelete.size());
+            log.info(value);
+          });
+      return toDelete.size();
+    } catch (Exception e) {
+      log.error("Cleanup failed", e);
+    }
+    return 0;
   }
 
   /**

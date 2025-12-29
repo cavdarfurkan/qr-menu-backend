@@ -36,6 +36,14 @@ public interface SessionUseCase {
   void terminateAllOtherSessions(String username, String currentSessionId);
 
   /**
+   * Terminate all expired sessions
+   *
+   * @author Furkan Çavdar
+   * @since 1.0.0
+   */
+  void terminateExpiredSessions();
+
+  /**
    * Audit session trails, such as login, logout events
    *
    * @param username Username of the user

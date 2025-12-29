@@ -38,6 +38,14 @@ public interface SessionRepositoryPort {
   List<SessionMetadata> findAllSessionsByUsername(String username);
 
   /**
+   * @return Deleted item count
+   * @author Furkan Çavdar
+   * @see SessionMetadata
+   * @since 1.0.0
+   */
+  int deleteAllExpiredSessions();
+
+  /**
    * @param sessionId ID representing a session
    * @author Furkan Çavdar
    * @since 1.0.0
