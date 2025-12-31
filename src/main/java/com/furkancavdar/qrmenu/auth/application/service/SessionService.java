@@ -1,6 +1,7 @@
 package com.furkancavdar.qrmenu.auth.application.service;
 
 import com.furkancavdar.qrmenu.auth.application.exception.SessionOwnerException;
+import com.furkancavdar.qrmenu.auth.application.exception.UnauthorizedException;
 import com.furkancavdar.qrmenu.auth.application.port.in.JwtTokenUseCase;
 import com.furkancavdar.qrmenu.auth.application.port.in.SessionUseCase;
 import com.furkancavdar.qrmenu.auth.application.port.out.SessionRepositoryPort;
@@ -48,14 +49,22 @@ public class SessionService implements SessionUseCase {
         jwtTokenUseCase.blacklistJti(
             sessionMetadata.getRefreshJti(), "Session is terminated", expirationTime);
       }
-      sessionRepository.deleteBySessionId(sessionId);
     } catch (Exception e) {
       log.error("Session {} termination failed: {}", sessionId, e.getMessage());
+      throw new RuntimeException("Session termination failed during JTI blacklisting", e);
     }
+    sessionRepository.deleteBySessionId(sessionId);
   }
 
   @Override
-  public void terminateAllOtherSessions(String username, String currentSessionId) {
+  public void terminateAllOtherSessions(String username, String authHeader) {
+    if (authHeader == null || !authHeader.toUpperCase().startsWith("BEARER ")) {
+      throw new UnauthorizedException("Invalid Bearer token");
+    }
+
+    String token = authHeader.substring(7);
+    String currentSessionId = jwtTokenUtil.extractSessionId(token);
+
     List<SessionMetadata> activeSessions = sessionRepository.findAllSessionsByUsername(username);
     activeSessions.stream()
         .filter(session -> !session.getSessionId().equals(currentSessionId))
@@ -63,9 +72,32 @@ public class SessionService implements SessionUseCase {
   }
 
   @Override
+  public void terminateAllSessions(String username) {
+    if (username == null) {
+      throw new NullPointerException("Username cannot be null");
+    }
+
+    List<SessionMetadata> activeSessions = sessionRepository.findAllSessionsByUsername(username);
+    activeSessions.forEach(
+        session -> {
+          try {
+            this.terminateSession(username, session.getSessionId());
+          } catch (Exception e) {
+            log.error(
+                "Failed to terminate session {} for user {}: {}",
+                session.getSessionId(),
+                username,
+                e.getMessage(),
+                e);
+          }
+        });
+  }
+
+  @Override
   @Scheduled(fixedRate = 86400000) // 1 day
   public void terminateExpiredSessions() {
     int itemCount = sessionRepository.deleteAllExpiredSessions();
+    log.info("Terminated {} expired sessions", itemCount);
     // TODO: Write to db (maybe)
   }
 

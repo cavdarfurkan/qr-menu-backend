@@ -1,6 +1,7 @@
 package com.furkancavdar.qrmenu.auth.application.service;
 
 import com.furkancavdar.qrmenu.auth.application.port.in.AuthenticationUseCase;
+import com.furkancavdar.qrmenu.auth.application.port.in.JwtTokenUseCase;
 import com.furkancavdar.qrmenu.auth.application.port.in.dto.*;
 import com.furkancavdar.qrmenu.auth.application.port.in.mapper.RegisterUserDtoMapper;
 import com.furkancavdar.qrmenu.auth.application.port.in.mapper.UserDtoMapper;
@@ -17,9 +18,7 @@ import io.jsonwebtoken.MalformedJwtException;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.NotImplementedException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,11 +28,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService implements AuthenticationUseCase {
-
-  private static final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
 
   private final UserRepositoryPort userRepository;
   private final RoleRepositoryPort roleRepository;
@@ -42,13 +40,13 @@ public class AuthenticationService implements AuthenticationUseCase {
   private final PasswordEncoder passwordEncoder;
 
   private final AuthenticationManager authenticationManager;
-  private final JwtTokenService jwtTokenService;
+  private final JwtTokenUseCase jwtTokenUseCase;
   private final JwtTokenUtil jwtTokenUtil;
   private final CustomUserDetailsService customUserDetailsService;
 
   @Override
   public UserDto register(RegisterDto registerDto) {
-    logger.info("Registering user: {}", registerDto);
+    log.info("Registering user: {}", registerDto);
     registerDto.setPassword(passwordEncoder.encode(registerDto.getPassword()));
     User user = RegisterUserDtoMapper.toEntity(registerDto);
 
@@ -72,13 +70,13 @@ public class AuthenticationService implements AuthenticationUseCase {
     try {
       Optional<User> optionalUser = authenticate(loginDto);
       if (optionalUser.isEmpty()) {
-        logger.error("User not found: {}", loginDto.getUsername());
+        log.error("User not found: {}", loginDto.getUsername());
         return Optional.empty();
       }
       User user = optionalUser.get();
 
       String sessionId = generateSessionId();
-      JwtTokenPair jwtTokenPair = jwtTokenService.generateTokenPair(user, sessionId);
+      JwtTokenPair jwtTokenPair = jwtTokenUseCase.generateTokenPair(user, sessionId);
       String refreshJti = jwtTokenUtil.extractJti(jwtTokenPair.getRefreshToken());
 
       String ipAddress = loginDto.getIp();
@@ -99,21 +97,33 @@ public class AuthenticationService implements AuthenticationUseCase {
           new LoginResultDto(UserDtoMapper.toUserDto(optionalUser.get()), jwtTokenPair);
       return Optional.of(loginResultDto);
     } catch (Exception e) {
-      logger.error("Authentication failed for user: {}", loginDto.getUsername(), e);
+      log.error("Authentication failed for user: {}", loginDto.getUsername(), e);
       return Optional.empty();
     }
   }
 
   @Override
-  public String updatePassword(LoginDto loginDto) {
-    // TODO
-    throw new NotImplementedException();
-  }
+  public boolean updatePassword(UpdatePasswordDto updatePasswordDto) {
+    Optional<User> optionalUser = userRepository.findByUsername(updatePasswordDto.getUsername());
+    if (optionalUser.isEmpty()) {
+      log.error("updatePassword:User not found: {}", updatePasswordDto.getUsername());
+      throw new BadCredentialsException("Invalid credentials");
+    }
+    User user = optionalUser.get();
 
-  @Override
-  public void logout() {
-    // TODO: Implement custom logout functionality
-    throw new NotImplementedException();
+    if (!passwordEncoder.matches(updatePasswordDto.getOldPassword(), user.getPassword())) {
+      log.error("updatePassword:Old password not match");
+      throw new BadCredentialsException("Invalid old password");
+    }
+
+    if (updatePasswordDto.getOldPassword().equals(updatePasswordDto.getNewPassword())) {
+      log.error("updatePassword:Old password and new password cannot be same");
+      throw new BadCredentialsException("Old Password and New Password cannot be same");
+    }
+
+    return userRepository.updatePassword(
+            user.getId(), passwordEncoder.encode(updatePasswordDto.getNewPassword()))
+        == 1;
   }
 
   @Override
@@ -129,46 +139,46 @@ public class AuthenticationService implements AuthenticationUseCase {
       long expirationTime = jwtTokenUtil.getExpirationTime(refreshToken);
 
       if (sessionId == null || refreshJti == null) {
-        logger.error("Session ID or Refresh Jti not found in refresh token");
+        log.error("Session ID or Refresh Jti not found in refresh token");
         return Optional.empty();
       }
 
       if (!sessionRepository.isUserOwnsSession(username, sessionId)) {
-        logger.error("Session does not belong to user");
+        log.error("Session does not belong to user");
         return Optional.empty();
       }
 
       UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
 
-      if (jwtTokenService.isJtiBlacklisted(refreshJti)) {
-        logger.error("Jti blacklisted");
+      if (jwtTokenUseCase.isJtiBlacklisted(refreshJti)) {
+        log.error("Jti blacklisted");
         sessionRepository.deleteBySessionId(sessionId);
         return Optional.empty();
       }
 
       if (!jwtTokenUtil.validateToken(refreshToken, userDetails)) {
-        logger.error("Refresh token validation failed");
+        log.error("Refresh token validation failed");
         return Optional.empty();
       }
 
       if (sessionRepository.isSessionExpired(sessionId)) {
-        logger.error("Session has expired");
+        log.error("Session has expired");
         sessionRepository.deleteBySessionId(sessionId);
         return Optional.empty();
       }
 
-      jwtTokenService.blacklistJti(
+      jwtTokenUseCase.blacklistJti(
           refreshJti, "JWTs refreshed", (expirationTime + 1000L) - System.currentTimeMillis());
 
       Optional<User> optionalUser = userRepository.findByUsername(username);
       if (optionalUser.isEmpty()) {
-        logger.error("refresh:User not found: {}", username);
+        log.error("refresh:User not found: {}", username);
         return Optional.empty();
       }
 
       User user = optionalUser.get();
 
-      JwtTokenPair newJwtTokenPair = jwtTokenService.generateTokenPair(user, sessionId);
+      JwtTokenPair newJwtTokenPair = jwtTokenUseCase.generateTokenPair(user, sessionId);
       String newRefreshJti = jwtTokenUtil.extractJti(newJwtTokenPair.getRefreshToken());
 
       Optional<SessionMetadata> optionalSessionMetadata =
@@ -200,26 +210,26 @@ public class AuthenticationService implements AuthenticationUseCase {
       RefreshResultDto refreshResultDto = new RefreshResultDto(newJwtTokenPair);
       return Optional.of(refreshResultDto);
     } catch (ExpiredJwtException e) {
-      logger.error("Refresh token is expired");
+      log.error("Refresh token is expired");
       return Optional.empty();
     } catch (MalformedJwtException e) {
-      logger.error("Refresh token is malformed");
+      log.error("Refresh token is malformed");
       return Optional.empty();
     } catch (Exception e) {
-      logger.error("Error while refreshing token", e);
+      log.error("Error while refreshing token", e);
       return Optional.empty();
     }
   }
 
   @Override
   public boolean existsByUsername(String username) {
-    logger.info("Checking if user exists with username: {}", username);
+    log.info("Checking if user exists with username: {}", username);
     return userRepository.existsByUsername(username);
   }
 
   @Override
   public boolean existsByEmail(String email) {
-    logger.info("Checking if email exists: {}", email);
+    log.info("Checking if email exists: {}", email);
     return userRepository.existsByEmail(email);
   }
 

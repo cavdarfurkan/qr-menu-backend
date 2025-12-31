@@ -29,11 +29,20 @@ public interface SessionUseCase {
    * Method to terminate all sessions except current (Log out from all other devices)
    *
    * @param username Username of the user
-   * @param currentSessionId Current session sessionId
+   * @param authHeader Authorization header for Bearer Token
    * @author Furkan Çavdar
    * @since 1.0.0
    */
-  void terminateAllOtherSessions(String username, String currentSessionId);
+  void terminateAllOtherSessions(String username, String authHeader);
+
+  /**
+   * Method to terminate all sessions
+   *
+   * @param username Username of the user
+   * @author Furkan Çavdar
+   * @since 1.0.0
+   */
+  void terminateAllSessions(String username);
 
   /**
    * Terminate all expired sessions

@@ -34,5 +34,10 @@ s3:
 
 app:
   base-url: http://localhost:8080
+  frontend-url: ${FRONTEND_URL}
+  security:
+    reset-token-expiry-minutes: 30
   cookie:
     secure: true
+  mail:
+    from: "QRMenu <no-reply@menu.furkancavdar.com>"

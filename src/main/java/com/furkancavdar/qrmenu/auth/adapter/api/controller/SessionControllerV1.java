@@ -58,15 +58,7 @@ public class SessionControllerV1 {
       HttpServletRequest request, @AuthenticationPrincipal UserDetails userDetails) {
     try {
       String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-
-      if (authHeader == null || !authHeader.toUpperCase().startsWith("BEARER ")) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-            .body(ApiResponse.error("Invalid Bearer token"));
-      }
-
-      String token = authHeader.substring(7);
-      String currentSessionId = jwtTokenUtil.extractSessionId(token);
-      sessionUseCase.terminateAllOtherSessions(userDetails.getUsername(), currentSessionId);
+      sessionUseCase.terminateAllOtherSessions(userDetails.getUsername(), authHeader);
       return ResponseEntity.ok(ApiResponse.success("Sessions terminated successfully"));
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

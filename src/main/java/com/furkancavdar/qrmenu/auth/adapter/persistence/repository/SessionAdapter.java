@@ -2,7 +2,12 @@ package com.furkancavdar.qrmenu.auth.adapter.persistence.repository;
 
 import com.furkancavdar.qrmenu.auth.application.port.out.SessionRepositoryPort;
 import com.furkancavdar.qrmenu.auth.domain.SessionMetadata;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.Cursor;
@@ -117,7 +122,7 @@ public class SessionAdapter implements SessionRepositoryPort {
             String sessionId = entry.getKey();
             SessionMetadata sessionMetadata = entry.getValue();
 
-            if (System.currentTimeMillis() > sessionMetadata.getExpiresAt() + 1000L) {
+            if (System.currentTimeMillis() > (sessionMetadata.getExpiresAt() + 1000L)) {
               String username = sessionMetadata.getUsername();
               String userSessionsKey = String.format(USER_SESSIONS, username);
 
@@ -129,15 +134,17 @@ public class SessionAdapter implements SessionRepositoryPort {
           (key, value) -> {
             stringRedisTemplate.opsForSet().remove(value, key);
             redisTemplate.opsForHash().delete(ALL_SESSIONS, key);
-
-            log.info("Cleaned up expired sessions: {}", toDelete.size());
-            log.info(value);
           });
+
+      if (!toDelete.isEmpty()) {
+        log.info("Cleaned up {} expired session(s)", toDelete.size());
+      }
+
       return toDelete.size();
     } catch (Exception e) {
       log.error("Cleanup failed", e);
+      return -1;
     }
-    return 0;
   }
 
   /**
@@ -174,7 +181,7 @@ public class SessionAdapter implements SessionRepositoryPort {
     if (session == null) {
       throw new NullPointerException("sessionId " + sessionId + " not found");
     }
-    return session.getExpiresAt() < System.currentTimeMillis();
+    return (session.getExpiresAt() + 1000L) < System.currentTimeMillis();
   }
 
   @Override

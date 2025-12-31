@@ -36,5 +36,4 @@ out/
 ### VS Code ###
 .vscode/
 
-setup-env.sh
-test-api.sh
+.env

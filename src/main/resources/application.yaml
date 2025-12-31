@@ -2,6 +2,9 @@ spring:
   application:
     name: qr-menu-web
 
+  config:
+    import: optional:file:.env[.properties]
+
   threads:
     virtual:
       enabled: true
@@ -62,6 +65,14 @@ spring:
       refresh:
         expiration: 604800000
 
+  cloud:
+    aws:
+      credentials:
+        access-key: ${AWS_ACCESS_KEY_ID}
+        secret-key: ${AWS_SECRET_ACCESS_KEY}
+      region:
+        static: ${AWS_REGION}
+
 server:
   port: 8080
 
@@ -69,7 +80,16 @@ s3:
   bucket-name: "qr-menu-themes-bucket"
   placeholder-thumbnail: "s3://${s3.bucket-name}/placeholder.jpg"
 
+resend:
+  api:
+    key: ${RESEND_API_KEY}
+
 app:
   base-url: http://localhost:8080
+  frontend-url: ${FRONTEND_URL}
+  security:
+    reset-token-expiry-minutes: 30
   cookie:
     secure: false
+  mail:
+    from: "QRMenu <no-reply@menu.furkancavdar.com>"

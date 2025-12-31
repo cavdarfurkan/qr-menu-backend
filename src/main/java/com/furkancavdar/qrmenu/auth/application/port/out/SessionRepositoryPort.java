@@ -38,6 +38,8 @@ public interface SessionRepositoryPort {
   List<SessionMetadata> findAllSessionsByUsername(String username);
 
   /**
+   * Deletes all expired sessions from the repository
+   *
    * @return Deleted item count
    * @author Furkan Çavdar
    * @see SessionMetadata

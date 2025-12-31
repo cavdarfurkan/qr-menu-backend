@@ -21,12 +21,18 @@ public class UserAdapter implements UserRepositoryPort {
   }
 
   @Override
+  public Optional<User> findById(Long id) {
+    return jpaUserRepository.findById(id).map(UserEntityMapper::toDomain);
+  }
+
+  @Override
   public Optional<User> findByUsername(String username) {
-    log.info(
-        "UserAdapter:findByUsername caller: {}.{}",
-        Thread.currentThread().getStackTrace()[2].getClassName(),
-        Thread.currentThread().getStackTrace()[2].getMethodName());
     return jpaUserRepository.findByUsername(username).map(UserEntityMapper::toDomain);
+  }
+
+  @Override
+  public Optional<User> findByEmail(String email) {
+    return jpaUserRepository.findByEmail(email).map(UserEntityMapper::toDomain);
   }
 
   @Override
@@ -37,5 +43,10 @@ public class UserAdapter implements UserRepositoryPort {
   @Override
   public boolean existsByEmail(String email) {
     return jpaUserRepository.existsByEmail(email);
+  }
+
+  @Override
+  public int updatePassword(Long userId, String newPassword) {
+    return jpaUserRepository.updatePasswordById(newPassword, userId);
   }
 }

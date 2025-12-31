@@ -14,6 +14,8 @@ public class EndpointsConfig {
         "/api/v1/auth/register",
         "/api/v1/auth/refresh",
         "/api/v1/auth/csrf",
+        "/api/v1/auth/forgot-password",
+        "/api/v1/auth/reset-password",
         "/api/test/all",
         "/api/test/session",
         "/api/v1/menu/job/**",
@@ -28,6 +30,7 @@ public class EndpointsConfig {
   @Bean("authenticatedEndpoints")
   public List<String> authenticatedEndpoints() {
     return List.of(
+        "/api/v1/auth/change-password",
         "/api/test/user",
         "/api/test/whoami",
         "/qr/test",

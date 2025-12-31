@@ -1,6 +1,8 @@
 package com.furkancavdar.qrmenu.common.exception;
 
+import com.furkancavdar.qrmenu.auth.application.exception.InvalidPasswordResetTokenException;
 import com.furkancavdar.qrmenu.auth.application.exception.SessionOwnerException;
+import com.furkancavdar.qrmenu.auth.application.exception.UnauthorizedException;
 import com.furkancavdar.qrmenu.common.ApiResponse;
 import com.networknt.schema.JsonSchemaException;
 import jakarta.validation.ConstraintViolationException;
@@ -146,6 +148,21 @@ public class GlobalExceptionHandler {
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ApiResponse<String> handleJsonSchemaException(JsonSchemaException ex) {
     log.error("JsonSchema exception: {}", ex.getMessage());
+    return ApiResponse.error(ex.getMessage());
+  }
+
+  @ExceptionHandler(InvalidPasswordResetTokenException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ApiResponse<String> handleInvalidPasswordResetTokenException(
+      InvalidPasswordResetTokenException ex) {
+    log.error("Invalid password reset token exception: {}", ex.getMessage());
+    return ApiResponse.error(ex.getMessage());
+  }
+
+  @ExceptionHandler(UnauthorizedException.class)
+  @ResponseStatus(HttpStatus.UNAUTHORIZED)
+  public ApiResponse<String> handleUnauthorizedException(UnauthorizedException ex) {
+    log.error("Unauthorized exception: {}", ex.getMessage());
     return ApiResponse.error(ex.getMessage());
   }
 }

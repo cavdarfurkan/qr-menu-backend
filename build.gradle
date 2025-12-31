@@ -22,7 +22,7 @@ repositories {
 dependencies {
     // TODO: Add Resilience4J
 
-//	implementation 'info.picocli:picocli-spring-boot-starter:4.7.7'
+    implementation 'com.resend:resend-java:4.11.0'
 
     implementation 'com.networknt:json-schema-validator:1.5.7'
 

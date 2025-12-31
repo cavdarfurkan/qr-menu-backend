@@ -3,10 +3,16 @@ package com.furkancavdar.qrmenu.auth.adapter.api.controller;
 import com.furkancavdar.qrmenu.auth.adapter.api.dto.mapper.LoginRequestMapper;
 import com.furkancavdar.qrmenu.auth.adapter.api.dto.mapper.LoginResponseMapper;
 import com.furkancavdar.qrmenu.auth.adapter.api.dto.mapper.RefreshResponseMapper;
+import com.furkancavdar.qrmenu.auth.adapter.api.dto.mapper.UpdatePasswordRequestMapper;
+import com.furkancavdar.qrmenu.auth.adapter.api.dto.payload.request.ForgotPasswordRequestDto;
 import com.furkancavdar.qrmenu.auth.adapter.api.dto.payload.request.LoginRequestDto;
+import com.furkancavdar.qrmenu.auth.adapter.api.dto.payload.request.ResetPasswordRequestDto;
+import com.furkancavdar.qrmenu.auth.adapter.api.dto.payload.request.UpdatePasswordRequestDto;
 import com.furkancavdar.qrmenu.auth.adapter.api.dto.payload.response.LoginResponseDto;
 import com.furkancavdar.qrmenu.auth.adapter.api.dto.payload.response.RefreshResponseDto;
 import com.furkancavdar.qrmenu.auth.application.port.in.AuthenticationUseCase;
+import com.furkancavdar.qrmenu.auth.application.port.in.PasswordResetUseCase;
+import com.furkancavdar.qrmenu.auth.application.port.in.SessionUseCase;
 import com.furkancavdar.qrmenu.auth.application.port.in.dto.LoginResultDto;
 import com.furkancavdar.qrmenu.auth.application.port.in.dto.RefreshResultDto;
 import com.furkancavdar.qrmenu.auth.application.port.in.dto.RegisterDto;
@@ -25,6 +31,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,15 +42,22 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthControllerV1 {
 
+  private final SessionUseCase sessionUseCase;
+
   @Value("${spring.security.token.refresh.expiration}")
   private long REFRESH_EXPIRATION;
 
   @Value("${app.cookie.secure}")
   private boolean secureCookie;
 
+  @Value("${app.frontend-url}")
+  private String frontendUrl;
+
   private final AuthenticationUseCase authenticationUseCase;
+  private final PasswordResetUseCase passwordResetUseCase;
 
   @PostMapping("/register")
+  // TODO: Use RegisterRequestDto
   public ResponseEntity<ApiResponse<UserDto>> registerUser(
       @Valid @RequestBody RegisterDto registerDto) {
     if (authenticationUseCase.existsByUsername(registerDto.getUsername())) {
@@ -88,18 +103,23 @@ public class AuthControllerV1 {
         .body(ApiResponse.success("Login successful", loginResponseDto));
   }
 
-  //    @GetMapping("/logout")
-  //    public ResponseEntity<ApiResponse<Void>> logout(HttpServletRequest request,
-  // HttpServletResponse response) {
-  //        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-  //        if (auth != null) {
-  //            new SecurityContextLogoutHandler().logout(request, response, auth);
-  //        }
-  //
-  //        authenticationUseCase.logout();
-  //
-  //        return ResponseEntity.ok(ApiResponse.success("Logout successful"));
-  //    }
+  @PostMapping("/change-password")
+  public ResponseEntity<ApiResponse<?>> changePassword(
+      HttpServletRequest request,
+      @AuthenticationPrincipal UserDetails userDetails,
+      @Valid @RequestBody UpdatePasswordRequestDto requestDto) {
+    boolean isSuccess =
+        authenticationUseCase.updatePassword(
+            UpdatePasswordRequestMapper.toUpdatePasswordDto(userDetails.getUsername(), requestDto));
+    if (!isSuccess) {
+      return ResponseEntity.badRequest().body(ApiResponse.error("Password change failed!"));
+    }
+
+    String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+    sessionUseCase.terminateAllOtherSessions(userDetails.getUsername(), authHeader);
+
+    return ResponseEntity.ok(ApiResponse.success("Password changed successfully!"));
+  }
 
   @PostMapping("/refresh")
   public ResponseEntity<ApiResponse<RefreshResponseDto>> refreshToken(
@@ -147,6 +167,32 @@ public class AuthControllerV1 {
   public CsrfToken getCsrfToken(CsrfToken csrfToken) {
     return csrfToken;
   }
+
+  @PostMapping("/forgot-password")
+  public ResponseEntity<ApiResponse<String>> forgotPassword(
+      @Valid @RequestBody ForgotPasswordRequestDto requestDto) {
+    passwordResetUseCase.requestReset(requestDto.getEmail());
+    return ResponseEntity.status(HttpStatus.ACCEPTED)
+        .body(ApiResponse.success("Reset link has been sent"));
+  }
+
+  @PostMapping("/reset-password")
+  public ResponseEntity<ApiResponse<String>> resetPassword(
+      @Valid @RequestBody ResetPasswordRequestDto requestDto) {
+    boolean isSuccess =
+        passwordResetUseCase.resetPassword(requestDto.getToken(), requestDto.getNewPassword());
+    if (!isSuccess) {
+      return ResponseEntity.badRequest().body(ApiResponse.error("Password reset failed!"));
+    }
+
+    return ResponseEntity.ok(ApiResponse.success("Password reset successful"));
+  }
+
+  // TODO
+  //    @PostMapping("/is-reset-password-token-expired")
+  //    public ResponseEntity<ApiResponse<String>> isResetPasswordTokenExpired() {
+  //        boolean isExpired = passwordResetUseCase.isExpired("");
+  //    }
 
   private String buildRefreshTokenCookie(String token) {
     long refreshTokenExpiration = TimeUnit.MILLISECONDS.toSeconds(REFRESH_EXPIRATION);
