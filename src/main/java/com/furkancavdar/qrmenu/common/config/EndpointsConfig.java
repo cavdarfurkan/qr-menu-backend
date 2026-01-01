@@ -10,6 +10,9 @@ public class EndpointsConfig {
   public List<String> publicEndpoints() {
     return List.of(
         "/actuator/**",
+        "/v3/api-docs/**",
+        "/swagger-ui.html",
+        "/swagger-ui/**",
         "/api/v1/auth/login",
         "/api/v1/auth/register",
         "/api/v1/auth/refresh",
@@ -22,7 +25,7 @@ public class EndpointsConfig {
 
         // TODO: FIX
         "/api/v1/theme",
-        //                "/api/v1/theme/{themeId}",
+        // "/api/v1/theme/{themeId}",
         "/api/v1/theme/{themeId}/schemas",
         "/api/theme/test/**");
   }
