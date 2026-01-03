@@ -16,6 +16,7 @@ public class UserMenuDtoMapper {
     UserMenuDto userMenuDto = new UserMenuDto();
     userMenuDto.setMenuId(menu.getId());
     userMenuDto.setMenuName(menu.getMenuName());
+    userMenuDto.setPublished(menu.getPublished());
     return userMenuDto;
   }
 

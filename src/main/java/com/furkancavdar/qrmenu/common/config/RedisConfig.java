@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.furkancavdar.qrmenu.menu_module.adapter.api.dto.payload.queue.BuildMenuJobDto;
+import com.furkancavdar.qrmenu.menu_module.adapter.api.dto.payload.queue.UnpublishMenuJobDto;
 import io.lettuce.core.ClientOptions;
 import java.time.Duration;
 import org.springframework.beans.factory.annotation.Value;
@@ -87,6 +88,24 @@ public class RedisConfig {
 
     Jackson2JsonRedisSerializer<BuildMenuJobDto> serializer =
         new Jackson2JsonRedisSerializer<>(mapper, BuildMenuJobDto.class);
+
+    t.setKeySerializer(new StringRedisSerializer());
+    t.setValueSerializer(serializer);
+    t.afterPropertiesSet();
+    return t;
+  }
+
+  @Bean
+  public RedisTemplate<String, UnpublishMenuJobDto> unpublishMenuJobRedisTemplate(
+      LettuceConnectionFactory connectionFactory) {
+    RedisTemplate<String, UnpublishMenuJobDto> t = new RedisTemplate<>();
+    t.setConnectionFactory(connectionFactory);
+
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+
+    Jackson2JsonRedisSerializer<UnpublishMenuJobDto> serializer =
+        new Jackson2JsonRedisSerializer<>(mapper, UnpublishMenuJobDto.class);
 
     t.setKeySerializer(new StringRedisSerializer());
     t.setValueSerializer(serializer);

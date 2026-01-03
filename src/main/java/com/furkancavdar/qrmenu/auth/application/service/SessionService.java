@@ -98,6 +98,7 @@ public class SessionService implements SessionUseCase {
   public void terminateExpiredSessions() {
     int itemCount = sessionRepository.deleteAllExpiredSessions();
     log.info("Terminated {} expired sessions", itemCount);
+    // FIX: If `itemCount` is -1, it is error
     // TODO: Write to db (maybe)
   }
 

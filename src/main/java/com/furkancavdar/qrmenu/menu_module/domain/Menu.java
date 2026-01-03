@@ -13,12 +13,14 @@ public class Menu {
   private final User owner;
   private final Theme selectedTheme;
   private final String customDomain;
+  private final Boolean published;
 
   public Menu(String menuName, User owner, Theme selectedTheme) {
     this.menuName = menuName;
     this.owner = owner;
     this.selectedTheme = selectedTheme;
     this.customDomain = null;
+    this.published = false;
   }
 
   public Menu(String menuName, User owner, Theme selectedTheme, String customDomain) {
@@ -26,6 +28,7 @@ public class Menu {
     this.owner = owner;
     this.selectedTheme = selectedTheme;
     this.customDomain = customDomain;
+    this.published = false;
   }
 
   public Menu(Long id, String menuName, User owner, Theme selectedTheme) {
@@ -35,6 +38,21 @@ public class Menu {
 
   public Menu(Long id, String menuName, User owner, Theme selectedTheme, String customDomain) {
     this(menuName, owner, selectedTheme, customDomain);
+    this.id = id;
+  }
+
+  public Menu(
+      Long id,
+      String menuName,
+      User owner,
+      Theme selectedTheme,
+      String customDomain,
+      Boolean published) {
+    this.menuName = menuName;
+    this.owner = owner;
+    this.selectedTheme = selectedTheme;
+    this.customDomain = customDomain;
+    this.published = published;
     this.id = id;
   }
 

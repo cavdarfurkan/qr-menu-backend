@@ -125,4 +125,19 @@ public class MenuControllerV1 {
     DomainAvailabilityResponseDto response = new DomainAvailabilityResponseDto(available);
     return ResponseEntity.ok(ApiResponse.success(response));
   }
+
+  @PostMapping("/{menuId}/unpublish")
+  public ResponseEntity<ApiResponse<BuildMenuResponseDto>> unpublishMenu(
+      @Valid @PathVariable @NotNull @Positive Long menuId,
+      @AuthenticationPrincipal UserDetails userDetails) {
+    log.info("MenuControllerV1:unpublishMenu");
+    BuildMenuResponseDto response =
+        BuildMenuResponseMapper.fromBuildMenuResultDto(
+            menuUseCase.unpublishMenu(menuId, userDetails.getUsername()));
+    return ResponseEntity.accepted()
+        .header(HttpHeaders.LOCATION, response.getStatusUrl())
+        .body(
+            ApiResponse.success(
+                "Menu unpublish request has been accepted for processing", response));
+  }
 }

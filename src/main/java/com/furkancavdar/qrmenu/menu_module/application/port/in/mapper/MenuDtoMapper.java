@@ -19,6 +19,7 @@ public class MenuDtoMapper {
     menuDto.setMenuName(menu.getMenuName());
     menuDto.setOwnerUsername(menu.getOwner().getUsername());
     menuDto.setSelectedThemeId(menu.getSelectedTheme().getId());
+    menuDto.setPublished(menu.getPublished());
     // Combine stored subdomain with base domain to return full domain
     if (menu.getCustomDomain() != null && !menu.getCustomDomain().isEmpty() && baseDomain != null) {
       menuDto.setCustomDomain(
@@ -34,11 +35,13 @@ public class MenuDtoMapper {
       return null;
     }
 
+    Boolean published = menuDto.getPublished() != null ? menuDto.getPublished() : false;
     return new Menu(
         menuDto.getMenuId(),
         menuDto.getMenuName(),
         owner,
         selectedTheme,
-        menuDto.getCustomDomain());
+        menuDto.getCustomDomain(),
+        published);
   }
 }

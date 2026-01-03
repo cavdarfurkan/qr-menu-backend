@@ -43,4 +43,9 @@ public class MenuAdapter implements MenuRepositoryPort {
   public Optional<Menu> findByCustomDomain(String customDomain) {
     return jpaMenuRepository.findByCustomDomain(customDomain).map(MenuEntityMapper::toMenu);
   }
+
+  @Override
+  public void updatePublishedStatus(Long menuId, boolean published) {
+    jpaMenuRepository.updatePublishedStatus(menuId, published);
+  }
 }

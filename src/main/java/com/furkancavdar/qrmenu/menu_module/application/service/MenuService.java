@@ -4,6 +4,7 @@ import com.furkancavdar.qrmenu.auth.application.port.out.UserRepositoryPort;
 import com.furkancavdar.qrmenu.auth.domain.User;
 import com.furkancavdar.qrmenu.common.exception.ResourceNotFoundException;
 import com.furkancavdar.qrmenu.menu_module.adapter.api.dto.payload.queue.BuildMenuJobDto;
+import com.furkancavdar.qrmenu.menu_module.adapter.api.dto.payload.queue.UnpublishMenuJobDto;
 import com.furkancavdar.qrmenu.menu_module.application.port.in.MenuContentUseCase;
 import com.furkancavdar.qrmenu.menu_module.application.port.in.MenuJobUseCase;
 import com.furkancavdar.qrmenu.menu_module.application.port.in.MenuUseCase;
@@ -17,6 +18,7 @@ import com.furkancavdar.qrmenu.menu_module.application.port.out.MenuRepositoryPo
 import com.furkancavdar.qrmenu.menu_module.domain.Menu;
 import com.furkancavdar.qrmenu.menu_module.domain.MenuJob;
 import com.furkancavdar.qrmenu.menu_module.domain.MenuJobStatus;
+import com.furkancavdar.qrmenu.menu_module.domain.MenuJobType;
 import com.furkancavdar.qrmenu.menu_module.util.DnsNameFormatter;
 import com.furkancavdar.qrmenu.menu_module.util.DomainUtility;
 import com.furkancavdar.qrmenu.theme_module.application.port.out.ThemeRepositoryPort;
@@ -29,7 +31,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.access.AccessDeniedException;
@@ -46,6 +47,9 @@ public class MenuService implements MenuUseCase {
   @Value("${app.menu.base-domain}")
   private String baseDomain;
 
+  @Value("${app.menu.worker-queue}")
+  private String workerQueue;
+
   private final MenuRepositoryPort menuRepository;
   private final UserRepositoryPort userRepository;
   private final ThemeRepositoryPort themeRepository;
@@ -53,9 +57,8 @@ public class MenuService implements MenuUseCase {
   private final MenuJobUseCase menuJobUseCase;
   private final MenuContentUseCase menuContentUseCase;
 
-  private final RedisTemplate<String, BuildMenuJobDto> redisTemplate;
-
-  private static final String BUILD_QUEUE = "queue:build:main";
+  private final RedisTemplate<String, BuildMenuJobDto> buildMenuJobRedisTemplate;
+  private final RedisTemplate<String, UnpublishMenuJobDto> unpublishMenuJobRedisTemplate;
 
   @Override
   @Transactional
@@ -122,6 +125,16 @@ public class MenuService implements MenuUseCase {
       throw new RuntimeException(ownerName + " is not the owner of menu " + menu.getMenuName());
     }
 
+    // Unpublish menu before deleting (asynchronously) - only if published
+    if (menu.getPublished() != null && menu.getPublished()) {
+      try {
+        unpublishMenu(menuId, ownerName);
+      } catch (Exception e) {
+        // Log error but don't fail deletion if unpublish fails
+        log.warn("Failed to unpublish menu {} before deletion: {}", menuId, e.getMessage());
+      }
+    }
+
     menuRepository.delete(menu);
   }
 
@@ -146,37 +159,80 @@ public class MenuService implements MenuUseCase {
     String statusUrl = baseUrl + "/api/v1/menu/job/" + jobId;
     String siteName;
     if (menu.getCustomDomain() != null && !menu.getCustomDomain().isEmpty()) {
-      // Combine stored subdomain with base domain
-      siteName = DomainUtility.combineSubdomainWithBase(menu.getCustomDomain(), baseDomain);
+      // Use just the stored subdomain (not the full domain)
+      siteName = menu.getCustomDomain();
     } else {
       siteName = DnsNameFormatter.toDnsLabel("%s-%s".formatted(menu.getMenuName(), ownerName));
     }
 
+    Long timestamp = System.currentTimeMillis();
     BuildMenuJobDto job =
         BuildMenuJobDto.builder()
             .themeLocationUrl(menu.getSelectedTheme().getThemeLocationUrl())
             .siteName(siteName)
             .contents(menuContents)
-            .timestamp(System.currentTimeMillis())
+            .timestamp(timestamp)
             .statusUrl(statusUrl)
             .build();
 
-    menuJobUseCase.save(new MenuJob(jobId, MenuJobStatus.PENDING));
+    menuJobUseCase.save(
+        new MenuJob(jobId, MenuJobStatus.PENDING, MenuJobType.BUILD, timestamp, menuId));
 
     // Enqueue
-    redisTemplate.opsForList().leftPush(BUILD_QUEUE, job);
+    buildMenuJobRedisTemplate.opsForList().leftPush(workerQueue, job);
 
     return new BuildMenuResultDto(statusUrl);
   }
 
   @Override
-  public void publishMenu() {
-    throw new NotImplementedException();
-  }
+  public BuildMenuResultDto unpublishMenu(Long menuId, String ownerName) {
+    Menu menu =
+        menuRepository
+            .findById(menuId)
+            .orElseThrow(() -> new ResourceNotFoundException("Menu not found"));
 
-  @Override
-  public void unpublishMenu() {
-    throw new NotImplementedException();
+    if (!menu.isOwner(ownerName)) {
+      throw new AccessDeniedException(
+          ownerName + " is not the owner of menu " + menu.getMenuName());
+    }
+
+    // Check if menu is already unpublished, skip if true
+    if (menu.getPublished() == null || !menu.getPublished()) {
+      log.info("Menu {} is already unpublished, skipping unpublish job", menuId);
+      return new BuildMenuResultDto(baseUrl + "/api/v1/menu/job/not-needed");
+    }
+
+    // Determine siteName (just the subdomain, not the full domain)
+    String siteName;
+    if (menu.getCustomDomain() != null && !menu.getCustomDomain().isEmpty()) {
+      // Use just the stored subdomain
+      siteName = menu.getCustomDomain();
+    } else {
+      // Auto-generated siteName
+      siteName = DnsNameFormatter.toDnsLabel("%s-%s".formatted(menu.getMenuName(), ownerName));
+    }
+
+    String jobId = UUID.randomUUID().toString();
+    String statusUrl = baseUrl + "/api/v1/menu/job/" + jobId;
+    Long timestamp = System.currentTimeMillis();
+
+    UnpublishMenuJobDto job =
+        UnpublishMenuJobDto.builder()
+            .type(MenuJobType.UNPUBLISH)
+            .siteName(siteName)
+            .statusUrl(statusUrl)
+            .timestamp(timestamp)
+            .build();
+
+    menuJobUseCase.save(
+        new MenuJob(jobId, MenuJobStatus.PENDING, MenuJobType.UNPUBLISH, timestamp, menuId));
+
+    // Enqueue
+    unpublishMenuJobRedisTemplate.opsForList().leftPush(workerQueue, job);
+
+    log.info("Unpublish job sent for menu {} with siteName {}", menuId, siteName);
+
+    return new BuildMenuResultDto(statusUrl);
   }
 
   @Override
@@ -238,6 +294,7 @@ public class MenuService implements MenuUseCase {
     }
 
     // Validate and normalize custom domain if provided
+    String oldCustomDomain = menu.getCustomDomain();
     String customDomain = menu.getCustomDomain();
     if (menuDto.getCustomDomain() != null) {
       String providedDomain = menuDto.getCustomDomain().trim();
@@ -262,11 +319,49 @@ public class MenuService implements MenuUseCase {
       }
     }
 
+    // If domain is changing, unpublish old domain (only if menu is published)
+    if (oldCustomDomain != null
+        && !oldCustomDomain.equals(customDomain)
+        && (customDomain == null || !customDomain.equals(oldCustomDomain))
+        && menu.getPublished() != null
+        && menu.getPublished()) {
+      // Use just the old subdomain (not the full domain)
+      String oldSiteName = oldCustomDomain;
+      try {
+        String jobId = UUID.randomUUID().toString();
+        String statusUrl = baseUrl + "/api/v1/menu/job/" + jobId;
+        Long timestamp = System.currentTimeMillis();
+
+        UnpublishMenuJobDto unpublishJob =
+            UnpublishMenuJobDto.builder()
+                .type(MenuJobType.UNPUBLISH)
+                .siteName(oldSiteName)
+                .statusUrl(statusUrl)
+                .timestamp(timestamp)
+                .build();
+
+        menuJobUseCase.save(
+            new MenuJob(jobId, MenuJobStatus.PENDING, MenuJobType.UNPUBLISH, timestamp, menuId));
+        unpublishMenuJobRedisTemplate.opsForList().leftPush(workerQueue, unpublishJob);
+
+        log.info("Unpublish job sent for old domain {} when updating menu {}", oldSiteName, menuId);
+      } catch (Exception e) {
+        // Log error but don't fail update if unpublish fails
+        log.warn(
+            "Failed to unpublish old domain {} when updating menu {}: {}",
+            oldSiteName,
+            menuId,
+            e.getMessage());
+      }
+    }
+
     // Update menu fields
     String menuName = menuDto.getMenuName() != null ? menuDto.getMenuName() : menu.getMenuName();
 
-    // Create updated menu
-    Menu updatedMenu = new Menu(menuId, menuName, menu.getOwner(), selectedTheme, customDomain);
+    // Create updated menu (preserve published status)
+    Menu updatedMenu =
+        new Menu(
+            menuId, menuName, menu.getOwner(), selectedTheme, customDomain, menu.getPublished());
     menuRepository.save(updatedMenu);
 
     log.info("Menu {} updated successfully", menuId);

@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1767477592000-8
+      author: Furkan Cavdar
+      comment: Change menu_job foreign key to CASCADE DELETE so menu jobs are automatically deleted when menu is deleted
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: menu_job
+            constraintName: fk_menu_job_menu
+        - addForeignKeyConstraint:
+            baseTableName: menu_job
+            baseColumnNames: menu_id
+            constraintName: fk_menu_job_menu
+            referencedTableName: menu
+            referencedColumnNames: id
+            onDelete: CASCADE

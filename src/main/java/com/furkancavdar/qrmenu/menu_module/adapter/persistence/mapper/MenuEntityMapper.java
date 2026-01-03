@@ -20,6 +20,7 @@ public class MenuEntityMapper {
     menuEntity.setOwner(UserEntityMapper.toEntity(menu.getOwner()));
     menuEntity.setSelectedTheme(ThemeEntityMapper.toThemeEntity(menu.getSelectedTheme()));
     menuEntity.setCustomDomain(menu.getCustomDomain());
+    menuEntity.setPublished(menu.getPublished());
     return menuEntity;
   }
 
@@ -33,6 +34,7 @@ public class MenuEntityMapper {
         menuEntity.getMenuName(),
         UserEntityMapper.toDomain(menuEntity.getOwner()),
         ThemeEntityMapper.toTheme(menuEntity.getSelectedTheme()),
-        menuEntity.getCustomDomain());
+        menuEntity.getCustomDomain(),
+        menuEntity.getPublished());
   }
 }

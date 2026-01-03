@@ -33,4 +33,7 @@ public class MenuEntity {
 
   @Column(name = "custom_domain", unique = true)
   private String customDomain;
+
+  @Column(name = "published", nullable = false)
+  private Boolean published;
 }

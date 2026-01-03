@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1767417922000-7
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            tableName: menu_job
+            columns:
+              - column:
+                  name: menu_id
+                  type: BIGINT
+        - addForeignKeyConstraint:
+            baseTableName: menu_job
+            baseColumnNames: menu_id
+            constraintName: fk_menu_job_menu
+            referencedTableName: menu
+            referencedColumnNames: id

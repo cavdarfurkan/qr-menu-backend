@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 1766868456684-1
+      id: 11767390937000-1
       author: Furkan Cavdar
       comment: Add custom_domain column to menu table with unique constraint and index
       objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
@@ -23,4 +23,3 @@ databaseChangeLog:
             columns:
               - column:
                   name: custom_domain
-

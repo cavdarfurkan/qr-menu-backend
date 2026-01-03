@@ -1,6 +1,7 @@
 package com.furkancavdar.qrmenu.menu_module.adapter.persistence.entity;
 
 import com.furkancavdar.qrmenu.menu_module.domain.MenuJobStatus;
+import com.furkancavdar.qrmenu.menu_module.domain.MenuJobType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,4 +23,15 @@ public class MenuJobEntity {
   @Enumerated(EnumType.STRING)
   @Column(name = "menu_job_status", nullable = false)
   private MenuJobStatus menuJobStatus;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "type", nullable = false)
+  private MenuJobType type;
+
+  @Column(name = "timestamp", nullable = false)
+  private Long timestamp;
+
+  @ManyToOne
+  @JoinColumn(name = "menu_id")
+  private MenuEntity menu;
 }

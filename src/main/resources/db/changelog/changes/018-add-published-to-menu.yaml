@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1767409237000-6
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            tableName: menu
+            columns:
+              - column:
+                  name: published
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false

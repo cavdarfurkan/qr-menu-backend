@@ -1,0 +1,25 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1767394537000-5
+      author: Furkan Cavdar
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            tableName: menu_job
+            columns:
+              - column:
+                  name: type
+                  type: VARCHAR(50)
+              - column:
+                  name: timestamp
+                  type: BIGINT
+        - sql:
+            sql: UPDATE menu_job SET type = 'build', timestamp = EXTRACT(EPOCH FROM CURRENT_TIMESTAMP)::BIGINT * 1000 WHERE type IS NULL
+        - addNotNullConstraint:
+            tableName: menu_job
+            columnName: type
+            columnDataType: VARCHAR(50)
+        - addNotNullConstraint:
+            tableName: menu_job
+            columnName: timestamp
+            columnDataType: BIGINT

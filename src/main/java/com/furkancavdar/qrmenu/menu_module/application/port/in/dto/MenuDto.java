@@ -13,4 +13,5 @@ public class MenuDto {
   private String ownerUsername;
   private Long selectedThemeId;
   private String customDomain;
+  private Boolean published;
 }

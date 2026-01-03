@@ -20,9 +20,7 @@ public interface MenuUseCase {
 
   BuildMenuResultDto buildMenu(Long menuId, String ownerName);
 
-  void publishMenu();
-
-  void unpublishMenu();
+  BuildMenuResultDto unpublishMenu(Long menuId, String ownerName);
 
   List<UserMenuDto> allUserMenus(String ownerName);
 

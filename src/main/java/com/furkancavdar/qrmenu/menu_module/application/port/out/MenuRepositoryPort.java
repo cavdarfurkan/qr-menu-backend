@@ -14,4 +14,6 @@ public interface MenuRepositoryPort {
   List<Menu> findAllByOwnerId(Long ownerId);
 
   Optional<Menu> findByCustomDomain(String customDomain);
+
+  void updatePublishedStatus(Long menuId, boolean published);
 }

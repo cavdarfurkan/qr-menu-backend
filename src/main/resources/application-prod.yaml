@@ -42,7 +42,8 @@ app:
   base-url: http://localhost:8080
   frontend-url: ${FRONTEND_URL}
   menu:
-    base-domain: ${MENU_CUSTOM_DOMAIN_BASE}
+    base-domain: menu.furkancavdar.com
+    worker-queue: queue:worker
   security:
     reset-token-expiry-minutes: 30
   cookie:
