@@ -30,4 +30,7 @@ public class MenuEntity {
   @ManyToOne(optional = false)
   @JoinColumn(name = "selected_theme_id", nullable = false)
   private ThemeEntity selectedTheme;
+
+  @Column(name = "custom_domain", unique = true)
+  private String customDomain;
 }

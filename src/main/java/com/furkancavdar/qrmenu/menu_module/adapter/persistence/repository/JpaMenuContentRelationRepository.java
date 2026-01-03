@@ -27,4 +27,9 @@ public interface JpaMenuContentRelationRepository
   @Query(
       "SELECT DISTINCT r.targetItem.id FROM MenuContentRelationEntity r WHERE r.targetItem.id IN :targetItemIds")
   Set<UUID> findReferencedTargetItemIds(Set<UUID> targetItemIds);
+
+  @Modifying(flushAutomatically = true)
+  @Query(
+      "DELETE FROM MenuContentRelationEntity r WHERE r.sourceItem.id IN :itemIds OR r.targetItem.id IN :itemIds")
+  void deleteByItemIds(Set<UUID> itemIds);
 }

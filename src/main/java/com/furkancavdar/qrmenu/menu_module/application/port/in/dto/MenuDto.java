@@ -12,4 +12,5 @@ public class MenuDto {
   private String menuName;
   private String ownerUsername;
   private Long selectedThemeId;
+  private String customDomain;
 }

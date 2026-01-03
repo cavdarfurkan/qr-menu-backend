@@ -27,4 +27,8 @@ public interface MenuUseCase {
   List<UserMenuDto> allUserMenus(String ownerName);
 
   MenuDto getMenu(Long menuId, String ownerName);
+
+  void updateMenu(Long menuId, MenuDto menuDto, String ownerName);
+
+  boolean checkDomainAvailability(String domain);
 }

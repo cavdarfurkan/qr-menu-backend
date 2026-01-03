@@ -28,6 +28,8 @@ public interface MenuContentRepositoryPort {
   Optional<MenuContentItem> findByMenuIdAndCollectionNameAndId(
       Long menuId, String collectionName, UUID itemId);
 
+  List<MenuContentItem> findByMenuId(Long menuId);
+
   List<MenuContentItem> findAllByIdIn(Set<UUID> ids);
 
   /*
@@ -50,4 +52,6 @@ public interface MenuContentRepositoryPort {
   boolean existsByTargetItemId(UUID targetItemId);
 
   Set<UUID> findReferencedTargetItemIds(Set<UUID> targetItemIds);
+
+  void deleteRelationsByItemIds(Set<UUID> itemIds);
 }

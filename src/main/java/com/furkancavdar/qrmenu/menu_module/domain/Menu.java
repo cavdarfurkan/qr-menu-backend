@@ -12,15 +12,29 @@ public class Menu {
   private final String menuName;
   private final User owner;
   private final Theme selectedTheme;
+  private final String customDomain;
 
   public Menu(String menuName, User owner, Theme selectedTheme) {
     this.menuName = menuName;
     this.owner = owner;
     this.selectedTheme = selectedTheme;
+    this.customDomain = null;
+  }
+
+  public Menu(String menuName, User owner, Theme selectedTheme, String customDomain) {
+    this.menuName = menuName;
+    this.owner = owner;
+    this.selectedTheme = selectedTheme;
+    this.customDomain = customDomain;
   }
 
   public Menu(Long id, String menuName, User owner, Theme selectedTheme) {
     this(menuName, owner, selectedTheme);
+    this.id = id;
+  }
+
+  public Menu(Long id, String menuName, User owner, Theme selectedTheme, String customDomain) {
+    this(menuName, owner, selectedTheme, customDomain);
     this.id = id;
   }
 

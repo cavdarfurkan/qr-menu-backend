@@ -75,4 +75,13 @@ public interface MenuContentUseCase {
   @Transactional
   void deleteContentBulk(
       String currentUsername, Long menuId, String collection, List<UUID> itemIds);
+
+  /**
+   * Delete all content items for a menu
+   *
+   * @param currentUsername Username of the owner
+   * @param menuId ID of the menu
+   */
+  @Transactional
+  void deleteAllContentByMenuId(String currentUsername, Long menuId);
 }

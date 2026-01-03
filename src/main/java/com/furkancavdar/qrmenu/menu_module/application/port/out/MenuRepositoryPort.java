@@ -12,4 +12,6 @@ public interface MenuRepositoryPort {
   Optional<Menu> findById(Long id);
 
   List<Menu> findAllByOwnerId(Long ownerId);
+
+  Optional<Menu> findByCustomDomain(String customDomain);
 }

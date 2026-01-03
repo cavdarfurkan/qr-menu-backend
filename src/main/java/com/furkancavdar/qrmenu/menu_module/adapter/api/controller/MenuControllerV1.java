@@ -3,13 +3,17 @@ package com.furkancavdar.qrmenu.menu_module.adapter.api.controller;
 import com.furkancavdar.qrmenu.common.ApiResponse;
 import com.furkancavdar.qrmenu.menu_module.adapter.api.dto.mapper.BuildMenuResponseMapper;
 import com.furkancavdar.qrmenu.menu_module.adapter.api.dto.mapper.CreateMenuRequestMapper;
+import com.furkancavdar.qrmenu.menu_module.adapter.api.dto.mapper.UpdateMenuRequestMapper;
 import com.furkancavdar.qrmenu.menu_module.adapter.api.dto.payload.request.BuildMenuRequestDto;
 import com.furkancavdar.qrmenu.menu_module.adapter.api.dto.payload.request.CreateMenuRequestDto;
+import com.furkancavdar.qrmenu.menu_module.adapter.api.dto.payload.request.UpdateMenuRequestDto;
 import com.furkancavdar.qrmenu.menu_module.adapter.api.dto.payload.response.BuildMenuResponseDto;
+import com.furkancavdar.qrmenu.menu_module.adapter.api.dto.payload.response.DomainAvailabilityResponseDto;
 import com.furkancavdar.qrmenu.menu_module.application.port.in.MenuUseCase;
 import com.furkancavdar.qrmenu.menu_module.application.port.in.dto.MenuDto;
 import com.furkancavdar.qrmenu.menu_module.application.port.in.dto.UserMenuDto;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
@@ -100,5 +104,25 @@ public class MenuControllerV1 {
     String ownerName = userDetails.getUsername();
     MenuDto menu = menuUseCase.getMenu(menuId, ownerName);
     return ResponseEntity.ok(ApiResponse.success(menu));
+  }
+
+  @PutMapping("/{menuId}")
+  public ResponseEntity<ApiResponse<String>> updateMenu(
+      @Valid @PathVariable @NotNull @Positive Long menuId,
+      @Valid @RequestBody UpdateMenuRequestDto updateMenuRequestDto,
+      @AuthenticationPrincipal UserDetails userDetails) {
+    log.info("MenuControllerV1:updateMenu");
+    MenuDto menuDto = UpdateMenuRequestMapper.toMenuDto(updateMenuRequestDto);
+    menuUseCase.updateMenu(menuId, menuDto, userDetails.getUsername());
+    return ResponseEntity.ok(ApiResponse.success("Menu updated successfully"));
+  }
+
+  @GetMapping("/domain/available")
+  public ResponseEntity<ApiResponse<DomainAvailabilityResponseDto>> checkDomainAvailability(
+      @Valid @RequestParam @NotBlank String domain) {
+    log.info("MenuControllerV1:checkDomainAvailability");
+    boolean available = menuUseCase.checkDomainAvailability(domain);
+    DomainAvailabilityResponseDto response = new DomainAvailabilityResponseDto(available);
+    return ResponseEntity.ok(ApiResponse.success(response));
   }
 }

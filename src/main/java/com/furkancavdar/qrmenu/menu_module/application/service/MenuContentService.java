@@ -312,6 +312,40 @@ public class MenuContentService implements MenuContentUseCase {
     return new HydratedItemDto(item.getId(), item.getCollectionName(), item.getData(), resolved);
   }
 
+  @Override
+  @Transactional
+  public void deleteAllContentByMenuId(String currentUsername, Long menuId) {
+    User currentUser =
+        userRepository
+            .findByUsername(currentUsername)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+    Menu menu =
+        menuRepository
+            .findById(menuId)
+            .orElseThrow(() -> new ResourceNotFoundException("Menu not found"));
+    if (!menu.getOwner().getId().equals(currentUser.getId())) {
+      throw new AccessDeniedException("Not your menu");
+    }
+
+    List<MenuContentItem> allContentItems = menuContentRepository.findByMenuId(menuId);
+    if (!allContentItems.isEmpty()) {
+      // Collect all item IDs
+      Set<UUID> itemIds =
+          allContentItems.stream().map(MenuContentItem::getId).collect(Collectors.toSet());
+
+      // Delete all relations first (both where items are sources or targets)
+      menuContentRepository.deleteRelationsByItemIds(itemIds);
+
+      // Now delete all content items
+      menuContentRepository.deleteAll(allContentItems);
+      log.info(
+          "Deleted {} content items and their relations for menu {}",
+          allContentItems.size(),
+          menuId);
+    }
+  }
+
   private void validateJsonWithSchema(String collection, JsonNode content, Menu menu) {
     JsonNode schema = menu.getSelectedTheme().getThemeSchemas().get(collection);
     Set<ValidationMessage> errors = schemaFactory.getSchema(schema).validate(content);

@@ -1,0 +1,26 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1766868456684-1
+      author: Furkan Cavdar
+      comment: Add custom_domain column to menu table with unique constraint and index
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            tableName: menu
+            columns:
+              - column:
+                  name: custom_domain
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: true
+        - addUniqueConstraint:
+            tableName: menu
+            columnNames: custom_domain
+            constraintName: uc_menu_custom_domain
+        - createIndex:
+            tableName: menu
+            indexName: idx_menu_custom_domain
+            columns:
+              - column:
+                  name: custom_domain
+

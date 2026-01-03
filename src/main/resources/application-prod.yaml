@@ -41,6 +41,8 @@ springdoc:
 app:
   base-url: http://localhost:8080
   frontend-url: ${FRONTEND_URL}
+  menu:
+    base-domain: ${MENU_CUSTOM_DOMAIN_BASE}
   security:
     reset-token-expiry-minutes: 30
   cookie:

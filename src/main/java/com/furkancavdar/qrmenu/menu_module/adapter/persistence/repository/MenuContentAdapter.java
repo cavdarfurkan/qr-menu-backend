@@ -74,6 +74,13 @@ public class MenuContentAdapter implements MenuContentRepositoryPort {
   }
 
   @Override
+  public List<MenuContentItem> findByMenuId(Long menuId) {
+    return jpaMenuContentItemRepository.findByMenu_Id(menuId).stream()
+        .map(MenuContentEntityMapper::toMenuContentItem)
+        .toList();
+  }
+
+  @Override
   public List<MenuContentItem> findAllByIdIn(Set<UUID> ids) {
     return jpaMenuContentItemRepository.findAllByIdIn(ids).stream()
         .map(MenuContentEntityMapper::toMenuContentItem)
@@ -131,5 +138,10 @@ public class MenuContentAdapter implements MenuContentRepositoryPort {
   @Override
   public Set<UUID> findReferencedTargetItemIds(Set<UUID> targetItemIds) {
     return jpaMenuContentRelationRepository.findReferencedTargetItemIds(targetItemIds);
+  }
+
+  @Override
+  public void deleteRelationsByItemIds(Set<UUID> itemIds) {
+    jpaMenuContentRelationRepository.deleteByItemIds(itemIds);
   }
 }

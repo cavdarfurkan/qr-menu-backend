@@ -17,5 +17,7 @@ public interface JpaMenuContentItemRepository extends JpaRepository<MenuContentI
   Optional<MenuContentItemEntity> findByMenu_IdAndCollectionNameAndId(
       Long menuId, String collectionName, UUID itemId);
 
+  List<MenuContentItemEntity> findByMenu_Id(Long menuId);
+
   List<MenuContentItemEntity> findAllByIdIn(Set<UUID> ids);
 }

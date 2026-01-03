@@ -11,6 +11,7 @@ public class CreateMenuRequestMapper {
       return null;
     }
 
-    return new MenuDto(null, dto.getMenuName(), ownerUsername, dto.getSelectedThemeId());
+    return new MenuDto(
+        null, dto.getMenuName(), ownerUsername, dto.getSelectedThemeId(), dto.getCustomDomain());
   }
 }
