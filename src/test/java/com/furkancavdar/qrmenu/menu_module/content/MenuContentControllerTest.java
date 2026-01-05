@@ -15,6 +15,7 @@ import com.furkancavdar.qrmenu.menu_module.domain.Menu;
 import com.furkancavdar.qrmenu.menu_module.domain.MenuContentItem;
 import com.furkancavdar.qrmenu.theme_module.application.port.out.ThemeRepositoryPort;
 import com.furkancavdar.qrmenu.theme_module.domain.Theme;
+import com.furkancavdar.qrmenu.theme_module.domain.ThemeCategory;
 import com.furkancavdar.qrmenu.theme_module.domain.ThemeManifest;
 import com.redis.testcontainers.RedisContainer;
 import java.util.HashMap;
@@ -951,6 +952,7 @@ public class MenuContentControllerTest {
                 "thumbnail_url",
                 "location_url",
                 true,
+                ThemeCategory.OTHER,
                 themeManifest,
                 themeSchemas,
                 uiSchemas));

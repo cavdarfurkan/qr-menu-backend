@@ -14,6 +14,7 @@ import com.furkancavdar.qrmenu.menu_module.domain.MenuContentItem;
 import com.furkancavdar.qrmenu.menu_module.domain.MenuContentRelation;
 import com.furkancavdar.qrmenu.theme_module.application.port.out.ThemeRepositoryPort;
 import com.furkancavdar.qrmenu.theme_module.domain.Theme;
+import com.furkancavdar.qrmenu.theme_module.domain.ThemeCategory;
 import com.furkancavdar.qrmenu.theme_module.domain.ThemeManifest;
 import com.redis.testcontainers.RedisContainer;
 import java.util.HashMap;
@@ -77,7 +78,14 @@ public class MenuContentRepositoryTest {
     // Create a theme
     Theme theme =
         new Theme(
-            owner, "thumbnail_url", "location_url", true, themeManifest, themeSchemas, uiSchemas);
+            owner,
+            "thumbnail_url",
+            "location_url",
+            true,
+            ThemeCategory.OTHER,
+            themeManifest,
+            themeSchemas,
+            uiSchemas);
     theme = themeRepositoryPort.save(theme);
 
     // Create a menu

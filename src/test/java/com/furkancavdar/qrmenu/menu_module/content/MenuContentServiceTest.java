@@ -16,6 +16,7 @@ import com.furkancavdar.qrmenu.menu_module.domain.Menu;
 import com.furkancavdar.qrmenu.menu_module.domain.MenuContentItem;
 import com.furkancavdar.qrmenu.theme_module.application.port.out.ThemeRepositoryPort;
 import com.furkancavdar.qrmenu.theme_module.domain.Theme;
+import com.furkancavdar.qrmenu.theme_module.domain.ThemeCategory;
 import com.furkancavdar.qrmenu.theme_module.domain.ThemeManifest;
 import com.redis.testcontainers.RedisContainer;
 import java.util.HashMap;
@@ -96,7 +97,15 @@ public class MenuContentServiceTest {
     Map<String, JsonNode> schemas = createThemeSchemas(collections);
     Map<String, JsonNode> uiSchemas = new HashMap<>();
     Theme theme =
-        new Theme(owner, "thumbnail_url", "location_url", true, manifest, schemas, uiSchemas);
+        new Theme(
+            owner,
+            "thumbnail_url",
+            "location_url",
+            true,
+            ThemeCategory.OTHER,
+            manifest,
+            schemas,
+            uiSchemas);
     return themeRepositoryPort.save(theme);
   }
 
@@ -130,7 +139,14 @@ public class MenuContentServiceTest {
     // Create a theme
     Theme theme =
         new Theme(
-            owner, "thumbnail_url", "location_url", true, themeManifest, themeSchemas, uiSchemas);
+            owner,
+            "thumbnail_url",
+            "location_url",
+            true,
+            ThemeCategory.OTHER,
+            themeManifest,
+            themeSchemas,
+            uiSchemas);
     theme = themeRepositoryPort.save(theme);
 
     // Create a menu
