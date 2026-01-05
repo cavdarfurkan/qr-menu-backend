@@ -88,6 +88,9 @@ public class MenuContentService implements MenuContentUseCase {
       }
     }
 
+    // Mark menu as not latest after content creation
+    menuRepository.updateIsLatestStatus(menuId, false);
+
     return hydrate(menuContentItem.getId());
   }
 
@@ -143,6 +146,9 @@ public class MenuContentService implements MenuContentUseCase {
         }
       }
     }
+
+    // Mark menu as not latest after content update
+    menuRepository.updateIsLatestStatus(menuId, false);
 
     return hydrate(itemId);
   }
@@ -217,6 +223,9 @@ public class MenuContentService implements MenuContentUseCase {
     // Delete the item (cascade delete will handle relations where this item is the source)
     menuContentRepository.delete(menuContentItem);
 
+    // Mark menu as not latest after content deletion
+    menuRepository.updateIsLatestStatus(menuId, false);
+
     log.info("Deleted menu content item with id {} from collection {}", itemId, collection);
   }
 
@@ -265,6 +274,9 @@ public class MenuContentService implements MenuContentUseCase {
     // Delete all items in a single batch operation (cascade delete will handle relations where
     // these items are sources)
     menuContentRepository.deleteAll(items);
+
+    // Mark menu as not latest after bulk content deletion
+    menuRepository.updateIsLatestStatus(menuId, false);
 
     log.info("Deleted {} menu content items from collection {}", items.size(), collection);
   }

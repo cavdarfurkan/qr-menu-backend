@@ -18,4 +18,9 @@ public interface JpaMenuRepository extends JpaRepository<MenuEntity, Long> {
   @Transactional
   @Query("UPDATE MenuEntity m SET m.published = :published WHERE m.id = :menuId")
   void updatePublishedStatus(@Param("menuId") Long menuId, @Param("published") boolean published);
+
+  @Modifying
+  @Transactional
+  @Query("UPDATE MenuEntity m SET m.isLatest = :isLatest WHERE m.id = :menuId")
+  void updateIsLatestStatus(@Param("menuId") Long menuId, @Param("isLatest") boolean isLatest);
 }

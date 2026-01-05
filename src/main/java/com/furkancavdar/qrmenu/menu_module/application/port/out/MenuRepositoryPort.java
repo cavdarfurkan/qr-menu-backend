@@ -16,4 +16,6 @@ public interface MenuRepositoryPort {
   Optional<Menu> findByCustomDomain(String customDomain);
 
   void updatePublishedStatus(Long menuId, boolean published);
+
+  void updateIsLatestStatus(Long menuId, boolean isLatest);
 }

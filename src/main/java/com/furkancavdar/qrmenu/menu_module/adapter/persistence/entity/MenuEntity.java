@@ -36,4 +36,7 @@ public class MenuEntity {
 
   @Column(name = "published", nullable = false)
   private Boolean published;
+
+  @Column(name = "is_latest", nullable = false)
+  private Boolean isLatest;
 }

@@ -44,10 +44,11 @@ public class MenuJobService implements MenuJobUseCase {
       if (menuJob != null && menuJob.getMenuId() != null && menuJob.getType() != null) {
         try {
           if (menuJob.getType() == MenuJobType.BUILD) {
-            // Build job completed - set menu as published
+            // Build job completed - set menu as published and mark as latest
             menuRepository.updatePublishedStatus(menuJob.getMenuId(), true);
+            menuRepository.updateIsLatestStatus(menuJob.getMenuId(), true);
             log.info(
-                "Menu {} marked as published after build job {} completed",
+                "Menu {} marked as published and latest after build job {} completed",
                 menuJob.getMenuId(),
                 jobId);
           } else if (menuJob.getType() == MenuJobType.UNPUBLISH) {

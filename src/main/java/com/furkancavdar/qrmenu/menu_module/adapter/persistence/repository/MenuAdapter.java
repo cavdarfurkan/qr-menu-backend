@@ -48,4 +48,9 @@ public class MenuAdapter implements MenuRepositoryPort {
   public void updatePublishedStatus(Long menuId, boolean published) {
     jpaMenuRepository.updatePublishedStatus(menuId, published);
   }
+
+  @Override
+  public void updateIsLatestStatus(Long menuId, boolean isLatest) {
+    jpaMenuRepository.updateIsLatestStatus(menuId, isLatest);
+  }
 }

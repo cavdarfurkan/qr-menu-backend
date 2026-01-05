@@ -14,6 +14,7 @@ public class Menu {
   private final Theme selectedTheme;
   private final String customDomain;
   private final Boolean published;
+  private final Boolean isLatest;
 
   public Menu(String menuName, User owner, Theme selectedTheme) {
     this.menuName = menuName;
@@ -21,6 +22,7 @@ public class Menu {
     this.selectedTheme = selectedTheme;
     this.customDomain = null;
     this.published = false;
+    this.isLatest = true;
   }
 
   public Menu(String menuName, User owner, Theme selectedTheme, String customDomain) {
@@ -29,6 +31,7 @@ public class Menu {
     this.selectedTheme = selectedTheme;
     this.customDomain = customDomain;
     this.published = false;
+    this.isLatest = true;
   }
 
   public Menu(Long id, String menuName, User owner, Theme selectedTheme) {
@@ -54,6 +57,24 @@ public class Menu {
     this.customDomain = customDomain;
     this.published = published;
     this.id = id;
+    this.isLatest = true;
+  }
+
+  public Menu(
+      Long id,
+      String menuName,
+      User owner,
+      Theme selectedTheme,
+      String customDomain,
+      Boolean published,
+      Boolean isLatest) {
+    this.menuName = menuName;
+    this.owner = owner;
+    this.selectedTheme = selectedTheme;
+    this.customDomain = customDomain;
+    this.published = published;
+    this.id = id;
+    this.isLatest = isLatest != null ? isLatest : true;
   }
 
   public Boolean isOwner(String username) {

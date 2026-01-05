@@ -20,6 +20,7 @@ public class MenuDtoMapper {
     menuDto.setOwnerUsername(menu.getOwner().getUsername());
     menuDto.setSelectedThemeId(menu.getSelectedTheme().getId());
     menuDto.setPublished(menu.getPublished());
+    menuDto.setIsLatest(menu.getIsLatest());
     // Combine stored subdomain with base domain to return full domain
     if (menu.getCustomDomain() != null && !menu.getCustomDomain().isEmpty() && baseDomain != null) {
       menuDto.setCustomDomain(
@@ -36,12 +37,14 @@ public class MenuDtoMapper {
     }
 
     Boolean published = menuDto.getPublished() != null ? menuDto.getPublished() : false;
+    Boolean isLatest = menuDto.getIsLatest() != null ? menuDto.getIsLatest() : true;
     return new Menu(
         menuDto.getMenuId(),
         menuDto.getMenuName(),
         owner,
         selectedTheme,
         menuDto.getCustomDomain(),
-        published);
+        published,
+        isLatest);
   }
 }

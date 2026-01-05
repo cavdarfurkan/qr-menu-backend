@@ -17,6 +17,7 @@ public class UserMenuDtoMapper {
     userMenuDto.setMenuId(menu.getId());
     userMenuDto.setMenuName(menu.getMenuName());
     userMenuDto.setPublished(menu.getPublished());
+    userMenuDto.setIsLatest(menu.getIsLatest());
     return userMenuDto;
   }
 

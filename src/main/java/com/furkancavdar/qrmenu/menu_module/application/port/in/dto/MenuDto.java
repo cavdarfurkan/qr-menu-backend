@@ -14,4 +14,5 @@ public class MenuDto {
   private Long selectedThemeId;
   private String customDomain;
   private Boolean published;
+  private Boolean isLatest;
 }

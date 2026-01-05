@@ -17,6 +17,7 @@ public class CreateMenuRequestMapper {
         ownerUsername,
         dto.getSelectedThemeId(),
         dto.getCustomDomain(),
-        false);
+        false,
+        true);
   }
 }

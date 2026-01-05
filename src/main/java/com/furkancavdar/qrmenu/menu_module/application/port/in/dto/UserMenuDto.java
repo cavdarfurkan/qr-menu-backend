@@ -11,4 +11,5 @@ public class UserMenuDto {
   private Long menuId;
   private String menuName;
   private Boolean published;
+  private Boolean isLatest;
 }

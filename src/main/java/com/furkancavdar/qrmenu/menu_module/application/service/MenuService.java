@@ -358,10 +358,16 @@ public class MenuService implements MenuUseCase {
     // Update menu fields
     String menuName = menuDto.getMenuName() != null ? menuDto.getMenuName() : menu.getMenuName();
 
-    // Create updated menu (preserve published status)
+    // Create updated menu (preserve published status and isLatest status)
     Menu updatedMenu =
         new Menu(
-            menuId, menuName, menu.getOwner(), selectedTheme, customDomain, menu.getPublished());
+            menuId,
+            menuName,
+            menu.getOwner(),
+            selectedTheme,
+            customDomain,
+            menu.getPublished(),
+            menu.getIsLatest());
     menuRepository.save(updatedMenu);
 
     log.info("Menu {} updated successfully", menuId);

@@ -1,0 +1,16 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1767574537000-1
+      author: Furkan Cavdar
+      comment: Add is_latest column to menu table to track if menu content is up to date with latest build
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            tableName: menu
+            columns:
+              - column:
+                  name: is_latest
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
