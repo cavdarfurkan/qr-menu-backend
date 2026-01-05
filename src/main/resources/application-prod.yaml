@@ -16,21 +16,13 @@ spring:
           max-idle: 20
           min-idle: 5
 
-  security:
-    token:
-      access:
-        expiration: 900000
-      refresh:
-        expiration: 604800000
+  docker:
+    compose:
+      enabled: false
 
 server:
-  port: 8080
   ssl:
     enabled: true
-
-s3:
-  bucket-name: "qr-menu-themes-bucket"
-  placeholder-thumbnail: "s3://${s3.bucket-name}/placeholder.jpg"
 
 springdoc:
   api-docs:
@@ -39,14 +31,5 @@ springdoc:
     enabled: false
 
 app:
-  base-url: http://localhost:8080
-  frontend-url: ${FRONTEND_URL}
-  menu:
-    base-domain: menu.furkancavdar.com
-    worker-queue: queue:worker
-  security:
-    reset-token-expiry-minutes: 30
   cookie:
     secure: true
-  mail:
-    from: "QRMenu <no-reply@menu.furkancavdar.com>"

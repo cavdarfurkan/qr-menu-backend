@@ -14,28 +14,6 @@ spring:
   #      virtual:
   #        enabled: true
 
-  datasource:
-    url: jdbc:postgresql://localhost:5432/qr-menu-db
-    username: myuser
-    password: secret
-    driver-class-name: org.postgresql.Driver
-
-  jpa:
-    show-sql: false
-    hibernate:
-      ddl-auto: none
-
-  data:
-    redis:
-      host: localhost
-      port: 6379
-      password:
-      lettuce:
-        pool:
-          max-active: 50
-          max-idle: 20
-          min-idle: 5
-
   session:
     redis:
       flush-mode: on-save
@@ -89,7 +67,5 @@ app:
     worker-queue: queue:worker
   security:
     reset-token-expiry-minutes: 30
-  cookie:
-    secure: false
   mail:
     from: "QRMenu <no-reply@menu.furkancavdar.com>"
