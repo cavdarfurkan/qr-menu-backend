@@ -1,36 +1,26 @@
 spring:
   application:
     name: qr-menu-web
-
   threads:
     virtual:
       enabled: true
-
-  #  task:
-  #    execution:
-  #      virtual:
-  #        enabled: true
-  #    scheduling:
-  #      virtual:
-  #        enabled: true
-
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: none
   session:
     redis:
       flush-mode: on-save
       namespace: spring:session
     timeout: 1800
-
   cache:
     type: redis
-
   servlet:
     multipart:
       max-file-size: 5MB
-
   liquibase:
     enabled: true
     change-log: classpath:db/changelog/db.changelog-master.yaml
-
   security:
     secret:
       key: ${JWT_SECRET_KEY}
@@ -39,7 +29,6 @@ spring:
         expiration: 900000
       refresh:
         expiration: 604800000
-
   cloud:
     aws:
       credentials:
@@ -50,20 +39,22 @@ spring:
 
 server:
   port: 8080
+  ssl:
+    enabled: false
 
 s3:
-  bucket-name: "qr-menu-themes-bucket"
-  placeholder-thumbnail: "s3://${s3.bucket-name}/placeholder.jpg"
+  bucket-name: ${S3_BUCKET_NAME}
+  placeholder-thumbnail: ${PLACEHOLDER_THUMBNAIL}
 
 resend:
   api:
     key: ${RESEND_API_KEY}
 
 app:
-  base-url: http://localhost:8080
+  base-url: ${BASE_URL}
   frontend-url: ${FRONTEND_URL}
   menu:
-    base-domain: menu.furkancavdar.com
+    base-domain: ${MENU_BASE_DOMAIN}
     worker-queue: queue:worker
   security:
     reset-token-expiry-minutes: 30
