@@ -34,6 +34,7 @@ public class EndpointsConfig {
   public List<String> authenticatedEndpoints() {
     return List.of(
         "/api/v1/auth/change-password",
+        "/api/v1/auth/switch-developer-role",
         "/api/test/user",
         "/api/test/whoami",
         "/qr/test",

@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -90,6 +91,7 @@ public class ThemeControllerV1 {
   }
 
   @PostMapping("/register")
+  @PreAuthorize("hasRole('DEVELOPER') or hasRole('ADMIN')")
   public ResponseEntity<ApiResponse<String>> registerTheme(
       @RequestPart("file") MultipartFile zipFile,
       @RequestPart(value = "image", required = false) MultipartFile imageFile,
@@ -132,15 +134,19 @@ public class ThemeControllerV1 {
   }
 
   @PostMapping("/unregister")
+  @PreAuthorize("hasRole('DEVELOPER') or hasRole('ADMIN')")
   public ResponseEntity<ApiResponse<String>> unregisterTheme(
       @Valid @RequestBody UnregisterThemeRequestDto unregisterThemeRequestDto,
       @AuthenticationPrincipal UserDetails userDetails) {
     try {
+      Boolean isDeveloper =
+          userDetails.getAuthorities().stream()
+              .anyMatch(authority -> authority.getAuthority().equals("ROLE_DEVELOPER"));
       Boolean isAdmin =
           userDetails.getAuthorities().stream()
               .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
       themeRegisterUseCase.unregisterTheme(
-          unregisterThemeRequestDto.getThemeId(), userDetails.getUsername(), isAdmin);
+          unregisterThemeRequestDto.getThemeId(), userDetails.getUsername(), isAdmin, isDeveloper);
     } catch (Exception e) {
       log.error("ThemeControllerV1:unregister error {}", e.getMessage());
       return ResponseEntity.internalServerError().body(ApiResponse.error(e.getMessage()));

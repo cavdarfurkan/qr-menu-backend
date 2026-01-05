@@ -80,13 +80,14 @@ public class ThemeRegisterService implements ThemeRegisterUseCase {
   }
 
   @Override
-  public void unregisterTheme(Long themeId, String ownerName, Boolean isAdmin) {
+  public void unregisterTheme(
+      Long themeId, String ownerName, Boolean isAdmin, Boolean isDeveloper) {
     Theme theme =
         themeRepository
             .findById(themeId)
             .orElseThrow(() -> new RuntimeException("Theme not found"));
 
-    if (!isAdmin && !theme.isOwner(ownerName)) {
+    if (!isAdmin && !isDeveloper && !theme.isOwner(ownerName)) {
       throw new RuntimeException(
           ownerName + " is not the owner of theme " + theme.getThemeManifest().getName());
     }

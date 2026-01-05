@@ -1,9 +1,11 @@
 package com.furkancavdar.qrmenu.auth.adapter.persistence.repository;
 
+import com.furkancavdar.qrmenu.auth.adapter.persistence.mapper.RoleEntityMapper;
 import com.furkancavdar.qrmenu.auth.adapter.persistence.mapper.UserEntityMapper;
 import com.furkancavdar.qrmenu.auth.application.port.out.UserRepositoryPort;
 import com.furkancavdar.qrmenu.auth.domain.User;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -48,5 +50,21 @@ public class UserAdapter implements UserRepositoryPort {
   @Override
   public int updatePassword(Long userId, String newPassword) {
     return jpaUserRepository.updatePasswordById(newPassword, userId);
+  }
+
+  @Override
+  public User updateRoles(User user) {
+    return jpaUserRepository
+        .findById(user.getId())
+        .map(
+            entity -> {
+              // Update only roles, preserving menus and themes
+              entity.setRoles(
+                  user.getRoles().stream()
+                      .map(RoleEntityMapper::toEntity)
+                      .collect(Collectors.toSet()));
+              return UserEntityMapper.toDomain(jpaUserRepository.save(entity));
+            })
+        .orElseThrow(() -> new RuntimeException("User not found with id: " + user.getId()));
   }
 }

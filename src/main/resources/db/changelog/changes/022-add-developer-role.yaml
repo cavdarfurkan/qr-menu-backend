@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1767601282000-1
+      author: Furkan Cavdar
+      changes:
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: name
+                  value: "DEVELOPER"

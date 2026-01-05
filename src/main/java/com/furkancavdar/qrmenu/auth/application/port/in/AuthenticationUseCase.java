@@ -15,4 +15,6 @@ public interface AuthenticationUseCase {
   boolean existsByUsername(String username);
 
   boolean existsByEmail(String email);
+
+  UserDto switchDeveloperRole(String username, boolean activate);
 }

@@ -233,6 +233,36 @@ public class AuthenticationService implements AuthenticationUseCase {
     return userRepository.existsByEmail(email);
   }
 
+  @Override
+  public UserDto switchDeveloperRole(String username, boolean activate) {
+    log.info("Switching DEVELOPER role for user: {}, activate: {}", username, activate);
+    Optional<User> optionalUser = userRepository.findByUsername(username);
+    if (optionalUser.isEmpty()) {
+      throw new RuntimeException("User not found: " + username);
+    }
+
+    User user = optionalUser.get();
+    Role developerRole =
+        roleRepository
+            .findByName("DEVELOPER")
+            .orElseThrow(() -> new RuntimeException("Error: DEVELOPER role not found"));
+
+    boolean hasDeveloperRole =
+        user.getRoles().stream().anyMatch(role -> role.name().equals("DEVELOPER"));
+
+    if (activate && !hasDeveloperRole) {
+      user.addRole(developerRole);
+      log.info("Added DEVELOPER role to user: {}", username);
+    } else if (!activate && hasDeveloperRole) {
+      user.removeRole(developerRole);
+      log.info("Removed DEVELOPER role from user: {}", username);
+    }
+
+    // Update only roles, preserving menus and themes to avoid orphan removal issues
+    User savedUser = userRepository.updateRoles(user);
+    return UserDtoMapper.toUserDto(savedUser);
+  }
+
   private String generateSessionId() {
     return UUID.randomUUID().toString();
   }

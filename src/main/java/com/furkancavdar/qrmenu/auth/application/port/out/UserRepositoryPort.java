@@ -17,4 +17,6 @@ public interface UserRepositoryPort {
   boolean existsByEmail(String email);
 
   int updatePassword(Long userId, String newPassword);
+
+  User updateRoles(User user);
 }

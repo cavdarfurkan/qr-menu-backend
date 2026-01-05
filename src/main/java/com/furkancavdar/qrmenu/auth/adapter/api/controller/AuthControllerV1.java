@@ -7,6 +7,7 @@ import com.furkancavdar.qrmenu.auth.adapter.api.dto.mapper.UpdatePasswordRequest
 import com.furkancavdar.qrmenu.auth.adapter.api.dto.payload.request.ForgotPasswordRequestDto;
 import com.furkancavdar.qrmenu.auth.adapter.api.dto.payload.request.LoginRequestDto;
 import com.furkancavdar.qrmenu.auth.adapter.api.dto.payload.request.ResetPasswordRequestDto;
+import com.furkancavdar.qrmenu.auth.adapter.api.dto.payload.request.SwitchRoleRequestDto;
 import com.furkancavdar.qrmenu.auth.adapter.api.dto.payload.request.UpdatePasswordRequestDto;
 import com.furkancavdar.qrmenu.auth.adapter.api.dto.payload.response.LoginResponseDto;
 import com.furkancavdar.qrmenu.auth.adapter.api.dto.payload.response.RefreshResponseDto;
@@ -119,6 +120,25 @@ public class AuthControllerV1 {
     sessionUseCase.terminateAllOtherSessions(userDetails.getUsername(), authHeader);
 
     return ResponseEntity.ok(ApiResponse.success("Password changed successfully!"));
+  }
+
+  @PostMapping("/switch-developer-role")
+  public ResponseEntity<ApiResponse<UserDto>> switchDeveloperRole(
+      @AuthenticationPrincipal UserDetails userDetails,
+      @Valid @RequestBody SwitchRoleRequestDto requestDto) {
+    try {
+      UserDto updatedUser =
+          authenticationUseCase.switchDeveloperRole(
+              userDetails.getUsername(), requestDto.getActivate());
+      String message =
+          requestDto.getActivate()
+              ? "Developer role activated successfully"
+              : "Developer role deactivated successfully";
+      return ResponseEntity.ok(ApiResponse.success(message, updatedUser));
+    } catch (Exception e) {
+      log.error("Role switch failed: {}", e.getMessage());
+      return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+    }
   }
 
   @PostMapping("/refresh")
