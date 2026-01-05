@@ -282,6 +282,11 @@ public class AuthenticationService implements AuthenticationUseCase {
     return userRepository.findByUsername(loginDto.getUsername());
   }
 
+  @Override
+  public Optional<UserDto> getCurrentUser(String username) {
+    return userRepository.findByUsername(username).map(UserDtoMapper::toUserDto);
+  }
+
   private SessionMetadata generateSessionMetadata(
       String sessionId,
       String username,

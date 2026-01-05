@@ -35,8 +35,8 @@ public class EndpointsConfig {
     return List.of(
         "/api/v1/auth/change-password",
         "/api/v1/auth/switch-developer-role",
+        "/api/v1/auth/me",
         "/api/test/user",
-        "/api/test/whoami",
         "/qr/test",
         "/api/v1/session/**",
         "/api/v1/theme/test",

@@ -122,6 +122,25 @@ public class AuthControllerV1 {
     return ResponseEntity.ok(ApiResponse.success("Password changed successfully!"));
   }
 
+  @GetMapping("/me")
+  public ResponseEntity<ApiResponse<UserDto>> getCurrentUser(
+      @AuthenticationPrincipal UserDetails userDetails) {
+    if (userDetails == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(ApiResponse.error("User is not authenticated"));
+    }
+
+    Optional<UserDto> optionalUserDto =
+        authenticationUseCase.getCurrentUser(userDetails.getUsername());
+
+    if (optionalUserDto.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error("User not found"));
+    }
+
+    return ResponseEntity.ok(
+        ApiResponse.success("Current user fetched successfully", optionalUserDto.get()));
+  }
+
   @PostMapping("/switch-developer-role")
   public ResponseEntity<ApiResponse<UserDto>> switchDeveloperRole(
       @AuthenticationPrincipal UserDetails userDetails,

@@ -8,6 +8,8 @@ public interface AuthenticationUseCase {
 
   Optional<LoginResultDto> login(LoginDto loginDto);
 
+  Optional<UserDto> getCurrentUser(String username);
+
   boolean updatePassword(UpdatePasswordDto updatePasswordDto);
 
   Optional<RefreshResultDto> refreshToken(String refreshToken);
