@@ -16,6 +16,7 @@ import com.furkancavdar.qrmenu.theme_module.adapter.api.dto.payload.response.The
 import com.furkancavdar.qrmenu.theme_module.application.port.in.ThemeRegisterUseCase;
 import com.furkancavdar.qrmenu.theme_module.application.port.in.dto.ThemeManifestResultDto;
 import com.furkancavdar.qrmenu.theme_module.application.port.in.dto.ThemeSchemasResultDto;
+import com.furkancavdar.qrmenu.theme_module.domain.ThemeCategory;
 import jakarta.validation.Valid;
 import java.util.Arrays;
 import java.util.List;
@@ -59,10 +60,26 @@ public class ThemeControllerV1 {
   @GetMapping
   public ResponseEntity<ApiResponse<Page<ThemeResponseDto>>> getAllThemes(
       @RequestParam(defaultValue = "0") Integer page,
-      @RequestParam(defaultValue = "20") Integer size) {
+      @RequestParam(defaultValue = "20") Integer size,
+      @RequestParam(required = false) ThemeCategory category) {
     Page<ThemeResponseDto> allThemes =
-        themeRegisterUseCase.getAllThemes(page, size).map(ThemeResponseMapper::fromThemeDto);
+        themeRegisterUseCase
+            .getAllThemes(page, size, category)
+            .map(ThemeResponseMapper::fromThemeDto);
     return ResponseEntity.ok(ApiResponse.success(allThemes));
+  }
+
+  @GetMapping("/my-themes")
+  public ResponseEntity<ApiResponse<Page<ThemeResponseDto>>> getMyThemes(
+      @RequestParam(defaultValue = "0") Integer page,
+      @RequestParam(defaultValue = "20") Integer size,
+      @RequestParam(required = false) ThemeCategory category,
+      @AuthenticationPrincipal UserDetails userDetails) {
+    Page<ThemeResponseDto> myThemes =
+        themeRegisterUseCase
+            .getThemesByOwner(userDetails.getUsername(), page, size, category)
+            .map(ThemeResponseMapper::fromThemeDto);
+    return ResponseEntity.ok(ApiResponse.success(myThemes));
   }
 
   @GetMapping("/{themeId}/schemas")

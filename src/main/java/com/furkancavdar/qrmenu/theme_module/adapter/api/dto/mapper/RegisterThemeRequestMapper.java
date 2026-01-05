@@ -18,6 +18,14 @@ public class RegisterThemeRequestMapper {
       ThemeManifest manifest,
       Map<String, JsonNode> themeSchemas,
       Map<String, JsonNode> uiSchemas) {
-    return new ThemeDto(themeId, owner, dto.getIsFree(), manifest, themeSchemas, uiSchemas);
+    return new ThemeDto(
+        themeId,
+        owner,
+        dto.getIsFree(),
+        dto.getCategory(),
+        null,
+        manifest,
+        themeSchemas,
+        uiSchemas);
   }
 }

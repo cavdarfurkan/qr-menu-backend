@@ -2,6 +2,7 @@ package com.furkancavdar.qrmenu.theme_module.adapter.persistence.entity;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.furkancavdar.qrmenu.auth.adapter.persistence.entity.UserEntity;
+import com.furkancavdar.qrmenu.theme_module.domain.ThemeCategory;
 import com.furkancavdar.qrmenu.theme_module.domain.ThemeManifest;
 import jakarta.persistence.*;
 import java.util.Map;
@@ -36,6 +37,10 @@ public class ThemeEntity {
 
   @Column(name = "is_free")
   private Boolean isFree = false;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "category", nullable = false)
+  private ThemeCategory category;
 
   @Embedded
   @AttributeOverrides({

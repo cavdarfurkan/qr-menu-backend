@@ -16,6 +16,8 @@ public class ThemeResponseMapper {
         themeDto.getId(),
         themeDto.getOwner() != null ? themeDto.getOwner().getUsername() : null,
         themeDto.getIsFree(),
+        themeDto.getCategory(),
+        themeDto.getThumbnailUrl(),
         themeDto.getThemeManifest(),
         themeDto.getThemeSchemas(),
         themeDto.getUiSchemas());

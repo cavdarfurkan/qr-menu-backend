@@ -3,6 +3,7 @@ package com.furkancavdar.qrmenu.theme_module.adapter.persistence.repository;
 import com.furkancavdar.qrmenu.theme_module.adapter.persistence.mapper.ThemeEntityMapper;
 import com.furkancavdar.qrmenu.theme_module.application.port.out.ThemeRepositoryPort;
 import com.furkancavdar.qrmenu.theme_module.domain.Theme;
+import com.furkancavdar.qrmenu.theme_module.domain.ThemeCategory;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +44,28 @@ public class ThemeAdapter implements ThemeRepositoryPort {
   }
 
   @Override
-  public Page<Theme> getAllThemes(Integer page, Integer size) {
-    return jpaThemeRepository.findAll(PageRequest.of(page, size)).map(ThemeEntityMapper::toTheme);
+  public Page<Theme> getAllThemes(Integer page, Integer size, ThemeCategory category) {
+    PageRequest pageRequest = PageRequest.of(page, size);
+    if (category != null) {
+      return jpaThemeRepository
+          .findByCategory(category, pageRequest)
+          .map(ThemeEntityMapper::toTheme);
+    }
+    return jpaThemeRepository.findAll(pageRequest).map(ThemeEntityMapper::toTheme);
+  }
+
+  @Override
+  public Page<Theme> findByOwnerUsername(
+      String username, Integer page, Integer size, ThemeCategory category) {
+    log.info("ThemeAdapter:findByOwnerUsername: {}, category: {}", username, category);
+    PageRequest pageRequest = PageRequest.of(page, size);
+    if (category != null) {
+      return jpaThemeRepository
+          .findByOwner_UsernameAndCategory(username, category, pageRequest)
+          .map(ThemeEntityMapper::toTheme);
+    }
+    return jpaThemeRepository
+        .findByOwner_Username(username, pageRequest)
+        .map(ThemeEntityMapper::toTheme);
   }
 }

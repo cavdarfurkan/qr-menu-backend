@@ -14,6 +14,7 @@ public class Theme {
   private final String thumbnailUrl;
   private final String themeLocationUrl;
   private final boolean isFree;
+  private final ThemeCategory category;
   private final ThemeManifest themeManifest;
   private final Map<String, JsonNode> themeSchemas;
   private final Map<String, JsonNode> uiSchemas;
@@ -23,6 +24,7 @@ public class Theme {
       String thumbnailUrl,
       String themeLocationUrl,
       boolean isFree,
+      ThemeCategory category,
       ThemeManifest themeManifest,
       Map<String, JsonNode> themeSchemas,
       Map<String, JsonNode> uiSchemas) {
@@ -30,6 +32,7 @@ public class Theme {
     this.thumbnailUrl = thumbnailUrl;
     this.themeLocationUrl = themeLocationUrl;
     this.isFree = isFree;
+    this.category = category;
     this.themeManifest = themeManifest;
     this.themeSchemas = themeSchemas;
     this.uiSchemas = uiSchemas;
@@ -41,10 +44,19 @@ public class Theme {
       String thumbnailUrl,
       String themeLocationUrl,
       boolean isFree,
+      ThemeCategory category,
       ThemeManifest themeManifest,
       Map<String, JsonNode> themeSchemas,
       Map<String, JsonNode> uiSchemas) {
-    this(owner, thumbnailUrl, themeLocationUrl, isFree, themeManifest, themeSchemas, uiSchemas);
+    this(
+        owner,
+        thumbnailUrl,
+        themeLocationUrl,
+        isFree,
+        category,
+        themeManifest,
+        themeSchemas,
+        uiSchemas);
     this.id = id;
   }
 

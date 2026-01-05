@@ -19,6 +19,7 @@ public class ThemeEntityMapper {
     themeEntity.setThumbnailUrl(theme.getThumbnailUrl());
     themeEntity.setThemeLocationUrl(theme.getThemeLocationUrl());
     themeEntity.setIsFree(theme.isFree());
+    themeEntity.setCategory(theme.getCategory());
     themeEntity.setThemeManifest(theme.getThemeManifest());
     themeEntity.setThemeSchemas(theme.getThemeSchemas());
     themeEntity.setUiSchemas(theme.getUiSchemas());
@@ -37,6 +38,7 @@ public class ThemeEntityMapper {
         themeEntity.getThumbnailUrl(),
         themeEntity.getThemeLocationUrl(),
         themeEntity.getIsFree(),
+        themeEntity.getCategory(),
         themeEntity.getThemeManifest(),
         themeEntity.getThemeSchemas(),
         themeEntity.getUiSchemas());

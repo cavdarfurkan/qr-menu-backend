@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1767608159000-1
+      author: Furkan Cavdar
+      comment: Add category column to theme table for theme categorization
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            tableName: theme
+            columns:
+              - column:
+                  name: category
+                  type: VARCHAR(50)
+        - sql:
+            sql: UPDATE theme SET category = 'OTHER' WHERE category IS NULL
+        - addNotNullConstraint:
+            tableName: theme
+            columnName: category
+            columnDataType: VARCHAR(50)
+

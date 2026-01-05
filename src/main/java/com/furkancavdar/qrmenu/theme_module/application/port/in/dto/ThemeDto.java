@@ -2,6 +2,7 @@ package com.furkancavdar.qrmenu.theme_module.application.port.in.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.furkancavdar.qrmenu.auth.domain.User;
+import com.furkancavdar.qrmenu.theme_module.domain.ThemeCategory;
 import com.furkancavdar.qrmenu.theme_module.domain.ThemeManifest;
 import java.util.Map;
 import lombok.AllArgsConstructor;
@@ -15,6 +16,8 @@ public class ThemeDto {
   private Long id;
   private User owner;
   private Boolean isFree = Boolean.TRUE;
+  private ThemeCategory category;
+  private String thumbnailUrl;
   private ThemeManifest themeManifest;
   private Map<String, JsonNode> themeSchemas;
   private Map<String, JsonNode> uiSchemas;

@@ -11,6 +11,7 @@ import com.furkancavdar.qrmenu.theme_module.application.port.in.mapper.ThemeDtoM
 import com.furkancavdar.qrmenu.theme_module.application.port.out.ThemeRepositoryPort;
 import com.furkancavdar.qrmenu.theme_module.application.port.out.ThemeStoragePort;
 import com.furkancavdar.qrmenu.theme_module.domain.Theme;
+import com.furkancavdar.qrmenu.theme_module.domain.ThemeCategory;
 import com.furkancavdar.qrmenu.theme_module.domain.ThemeManifest;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -153,8 +154,16 @@ public class ThemeRegisterService implements ThemeRegisterUseCase {
   }
 
   @Override
-  public Page<ThemeDto> getAllThemes(Integer page, Integer size) {
-    return themeRepository.getAllThemes(page, size).map(ThemeDtoMapper::toThemeDto);
+  public Page<ThemeDto> getAllThemes(Integer page, Integer size, ThemeCategory category) {
+    return themeRepository.getAllThemes(page, size, category).map(ThemeDtoMapper::toThemeDto);
+  }
+
+  @Override
+  public Page<ThemeDto> getThemesByOwner(
+      String username, Integer page, Integer size, ThemeCategory category) {
+    return themeRepository
+        .findByOwnerUsername(username, page, size, category)
+        .map(ThemeDtoMapper::toThemeDto);
   }
 
   private ExtractResult extractManifestAndSchemas(byte[] zipBytes) {
