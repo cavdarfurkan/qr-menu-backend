@@ -1,6 +1,21 @@
 spring:
   application:
     name: qr-menu-web
+  datasource:
+    url: ${PG_URL}
+    username: ${PG_USERNAME}
+    password: ${PG_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+      lettuce:
+        pool:
+          max-active: 50
+          max-idle: 20
+          min-idle: 5
   threads:
     virtual:
       enabled: true
@@ -8,6 +23,9 @@ spring:
     show-sql: false
     hibernate:
       ddl-auto: none
+  docker:
+    compose:
+      enabled: true
   session:
     redis:
       flush-mode: on-save
@@ -58,5 +76,7 @@ app:
     worker-queue: queue:worker
   security:
     reset-token-expiry-minutes: 30
+  cookie:
+    secure: false
   mail:
     from: "QRMenu <no-reply@menu.furkancavdar.com>"
