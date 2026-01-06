@@ -42,6 +42,9 @@ public class WebSecurityConfig {
   @Value("${app.cookie.secure}")
   private boolean secureCookie;
 
+  @Value("${app.frontend-url}")
+  private String frontendUrl;
+
   @Qualifier("publicEndpoints")
   private final List<String> publicEndpoints;
 
@@ -137,14 +140,19 @@ public class WebSecurityConfig {
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOrigins(
-        List.of(
-            "http://localhost:5173",
-            "http://localhost:3000",
-            "http://192.168.1.15:5173",
-            "http://192.168.1.13:5173",
-            "https://fifty-apes-sing.loca.lt/"));
-    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
+    List<String> allowedOrigins =
+        new java.util.ArrayList<>(List.of("http://localhost:*", "http://192.168.*.*:*"));
+
+    if (frontendUrl != null && !frontendUrl.isEmpty()) {
+      allowedOrigins.add(frontendUrl);
+    }
+
+    configuration.setAllowedOriginPatterns(allowedOrigins);
+
+    configuration.setAllowedMethods(
+        List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"));
+
     configuration.setAllowedHeaders(
         List.of(
             "Authorization",
@@ -152,7 +160,15 @@ public class WebSecurityConfig {
             "X-Requested-With",
             "X-XSRF-TOKEN",
             "X-Request-Cookie-Secure",
-            "X-Request-Cookie-SameSite"));
+            "X-Request-Cookie-SameSite",
+            "Accept",
+            "Origin",
+            "Access-Control-Request-Method",
+            "Access-Control-Request-Headers"));
+
+    configuration.setExposedHeaders(
+        List.of("X-XSRF-TOKEN", "Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"));
+
     configuration.setAllowCredentials(true);
     configuration.setMaxAge(3600L);
 
