@@ -11,6 +11,7 @@ spring:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
       password: ${REDIS_PASSWORD}
+      timeout: 2s
       lettuce:
         pool:
           max-active: 50
@@ -47,13 +48,6 @@ spring:
         expiration: 900000
       refresh:
         expiration: 604800000
-  cloud:
-    aws:
-      credentials:
-        access-key: ${AWS_ACCESS_KEY_ID}
-        secret-key: ${AWS_SECRET_ACCESS_KEY}
-      region:
-        static: ${AWS_REGION}
 
 server:
   port: 8080
